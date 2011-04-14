@@ -1,0 +1,9 @@
+﻿#
+#
+
+[regex]
+comics.com,class="STR_StripImage".*?title="(?<title>.*?)".*?<img src="(?<url>.*?)".*?alt="(?<alt>.*?)".*?/>
+
+[comics]
+Pearl Before Swine,comics.com/pearls_before_swine,named:comics.com
+Dilbert,dilbert.com/,<img src="(?<url>http://.*?/dyn/str_strip/.*?\.gif).*?alt=\"(?<alt>.*?)\".*?/>(?<title>)
