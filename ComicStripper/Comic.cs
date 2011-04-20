@@ -5,6 +5,7 @@ using System.Text;
 
 namespace ComicStripper
 {
+    [Serializable]
     public class Comic
     {
         /// <summary>
@@ -26,5 +27,17 @@ namespace ComicStripper
         /// <![CDATA[<p class=\"feature_item\">.*?src='(?<url>.*?)'.*?alt='(?<title>.*?)'(?<alt>)]]>
         /// </summary>
         public string SearchRegex { get; set; }
+
+
+        public string PreviousFetchCRC { get; set; }
+
+        public int PreviousFetchSize { get; set; }
+
+        public Comic()
+        {
+            Title = Url = SearchRegex = PreviousFetchCRC =
+                string.Empty;
+            PreviousFetchSize = -1;
+        }
     }
 }
