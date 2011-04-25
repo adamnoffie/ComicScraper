@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml.Serialization;
 
 namespace ComicStripper
 {
@@ -12,12 +13,14 @@ namespace ComicStripper
         /// Title of the Comic
         /// <example>Pearls Before Swine</example>
         /// </summary>
+        [XmlAttribute]
         public string Title { get; set; }
 
         /// <summary>
         /// Url to the latest edition of the strip
         /// <example>http://comics.com/pearls_before_swine</example>
         /// </summary>
+        [XmlIgnore]
         public string Url { get; set; }
 
         /// <summary>
@@ -26,11 +29,13 @@ namespace ComicStripper
         /// </example>
         /// <![CDATA[<p class=\"feature_item\">.*?src='(?<url>.*?)'.*?alt='(?<title>.*?)'(?<alt>)]]>
         /// </summary>
+        [XmlIgnore]
         public string SearchRegex { get; set; }
 
-
+        [XmlAttribute]
         public string PreviousFetchCRC { get; set; }
 
+        [XmlAttribute]
         public int PreviousFetchSize { get; set; }
 
         public Comic()

@@ -7,6 +7,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 using ComicStripper.Properties;
 using System.Threading;
+using Util;
 
 namespace ComicStripper
 {
@@ -14,6 +15,7 @@ namespace ComicStripper
     {
         string _emailBody = "";
         string _configFilePath = Path.Combine(Environment.CurrentDirectory, Constants.ComicsFile);
+        string _historyFilePath = Path.Combine(Environment.CurrentDirectory, Constants.ComicsHistoryFile);
         
         List<ComicStripRegex> _regexes = new List<ComicStripRegex>();
         List<Comic> _comics = new List<Comic>();
@@ -26,6 +28,8 @@ namespace ComicStripper
             if (!ReadConfigFile())
                 return;
 
+            ReadHistoryFile();
+
             foreach (Comic c in _comics)
             {
                 RipComic(c);
@@ -33,12 +37,30 @@ namespace ComicStripper
             }
         }
 
+        // see if we have a history file, with sizes and md5 checksums for previous comic fetch
+        private void ReadHistoryFile()
+        {
+            if (File.Exists(_historyFilePath))
+            {
+                // read in the info about comics in the history XML file
+                List<Comic> histories = XmlEx.FromXmlFile<List<Comic>>(_historyFilePath);
+                foreach (Comic ch in histories)
+                {
+                    Comic c = _comics.Where(x => x.Title == ch.Title).FirstOrDefault();
+                    if (c != null)
+                    {
+                        // update the comics list with the info gleaned from the history log
+                        c.PreviousFetchCRC = ch.PreviousFetchCRC;
+                        c.PreviousFetchSize = ch.PreviousFetchSize;
+                    }
+                }
+            }
+        }
+
         // rip a comic from the site
         private void RipComic(Comic c)
         {
             Logger.WriteLine("== Stripping {0} == {1} ==", c.Title, c.Url);
-
-            // TODO: read "ini file" for prevoius fetching of comics info
 
             // get the page that has the comic
             string pageHtml = FetchUrlAsString(c.Url);
@@ -57,8 +79,24 @@ namespace ComicStripper
 
                 Logger.WriteLine("url: {0}, title: {1}, alt: {2}", comicUri, title, alt);
 
-                long comicSize = FetchUrlContentSize(comicUri, c.Url);
-                // setup spoof headers, request the strip image's size
+                //
+                // TODO: Grr... this is dumb...why even get the size with HEAD if you are going to do a CRC check anyhow?
+                //      pick one, and  run with it"
+                //      A ) download the image, do a size check to save a MD5 calc (same size == do MD5, otherwise don't need to)
+                //      B ) do a HEAD, and use same image size == same image logice (accept miniscule chance of error)
+
+
+                bool newComicToFetch = false;
+
+                // strip image's size
+                int comicSize = (int)FetchUrlContentSize(comicUri, c.Url);
+                if (comicSize == c.PreviousFetchSize)
+                {
+                    // same size, will need to check the CRC
+                }
+                else // different sizes, definitly fetch
+                    newComicToFetch = true;
+                
                 Logger.WriteLine("Size: " + comicSize);
                 
 
