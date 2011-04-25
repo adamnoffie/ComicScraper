@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ComicStripper
+namespace Util
 {
     /// <summary>
     /// This class is mostly here to make converting this to a non-Console app easier. 
