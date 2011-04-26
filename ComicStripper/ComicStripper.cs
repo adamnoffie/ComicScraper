@@ -50,8 +50,8 @@ namespace ComicStripper
                     if (c != null)
                     {
                         // update the comics list with the info gleaned from the history log
-                        c.PreviousFetchCRC = ch.PreviousFetchCRC;
-                        c.PreviousFetchSize = ch.PreviousFetchSize;
+                        c.PreviousImgUrl = ch.PreviousImgUrl;
+                        c.PreviousImgSize = ch.PreviousImgSize;
                     }
                 }
             }
@@ -79,25 +79,32 @@ namespace ComicStripper
 
                 Logger.WriteLine("url: {0}, title: {1}, alt: {2}", comicUri, title, alt);
 
-                //
-                // TODO: Grr... this is dumb...why even get the size with HEAD if you are going to do a CRC check anyhow?
-                //      pick one, and  run with it"
-                //      A ) download the image, do a size check to save a MD5 calc (same size == do MD5, otherwise don't need to)
-                //      B ) do a HEAD, and use same image size == same image logice (accept miniscule chance of error)
-
-
-                bool newComicToFetch = false;
-
-                // strip image's size
+                // quickly get (using HEAD) the strip image's size, then see if it is different comic
+                // NOTE: this assumes different size is different comic, same size is same comic
+                // it is highly unlikely that two strips in a row, by same author, would be exact same size in bytes
                 int comicSize = (int)FetchUrlContentSize(comicUri, c.Url);
-                if (comicSize == c.PreviousFetchSize)
+                if (comicSize != c.PreviousImgSize) // different size, do the comic
                 {
-                    // same size, will need to check the CRC
+                    c.PreviousImgUrl = comicUri.ToString();
+                    HttpWebRequest req = WebRequest.Create(comicUri) as HttpWebRequest;
+                    req.Method = "GET";
+                    req.UserAgent = Settings.Default.UserAgent;
+                    using (WebResponse resp = req.GetResponse())
+                    using (StreamReader sr = new StreamReader(resp.GetResponseStream()))
+                    {
+                        // TODO:
+                        //      Write the comic image to disk, and store the path in Comic object
+                        //          - thus, refactor code just above this to    
+                        //              FetchUrlToFile(string filePath)
+                        //      Later, use: http://www.systemnetmail.com/faq/4.4.aspx to embed images in email
+
+                    }
                 }
-                else // different sizes, definitly fetch
-                    newComicToFetch = true;
-                
-                Logger.WriteLine("Size: " + comicSize);
+                else // same size, same comic as last run, don't need to fetch
+                {
+                    Logger.WriteLine("Same size as Previous Fetch! Skipping.");
+                    c.IsNewComic = false;
+                }
                 
 
                 
