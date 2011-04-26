@@ -17,7 +17,7 @@ namespace ComicStripper
         public string Title { get; set; }
 
         /// <summary>
-        /// Url to the latest edition of the strip
+        /// Url to the PAGE with the latest edition of the strip
         /// <example>http://comics.com/pearls_before_swine</example>
         /// </summary>
         [XmlIgnore]
@@ -33,16 +33,23 @@ namespace ComicStripper
         public string SearchRegex { get; set; }
 
         [XmlAttribute]
-        public string PreviousFetchCRC { get; set; }
+        public string PreviousImgUrl { get; set; }
 
         [XmlAttribute]
-        public int PreviousFetchSize { get; set; }
+        public int PreviousImgSize { get; set; }
+
+        [XmlIgnore]
+        public bool IsNewComic { get; set; }
+
+        [XmlIgnore]
+        public byte[] StripImg { get; set; }
 
         public Comic()
-        {
-            Title = Url = SearchRegex = PreviousFetchCRC =
+        {            
+            Title = Url = SearchRegex = PreviousImgUrl =
                 string.Empty;
-            PreviousFetchSize = -1;
+            PreviousImgSize = -1;
+            IsNewComic = false;
         }
     }
 }
