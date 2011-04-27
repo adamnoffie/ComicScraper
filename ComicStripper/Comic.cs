@@ -42,7 +42,7 @@ namespace ComicStripper
         public bool IsNewComic { get; set; }
 
         [XmlIgnore]
-        public byte[] StripImg { get; set; }
+        public string StripImgFilePath { get; set; }
 
         public Comic()
         {            

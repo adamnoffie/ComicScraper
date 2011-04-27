@@ -14,6 +14,13 @@ title='[[ALTTEXT]]' alt='[[TITLE]]' ></a></p><br>[[ALTTEXT]]";
 
         public const string ComicsFile = "Comics.txt";
         public const string ComicsHistoryFile = "History.xml";
+        
+        public const string ComicStripImgPath = "Comics\\";
+
+        /// <summary>
+        /// Format String with: 0 - filename. NOTE: need to add an extension
+        /// </summary>
+        public const string ComicStripImgFilePath = "Comics\\{0}";
 
         public struct Sections
         {

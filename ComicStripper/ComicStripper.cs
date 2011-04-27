@@ -25,16 +25,24 @@ namespace ComicStripper
         /// </summary>
         public void Run()
         {
+            // read in configuration file, and history file if there is one
             if (!ReadConfigFile())
                 return;
-
             ReadHistoryFile();
+
+            // create directory for storing images if it doesn't exist
+            if (!Directory.Exists(Path.Combine(Environment.CurrentDirectory, Constants.ComicStripImgPath)))
+                Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, Constants.ComicStripImgPath));
 
             foreach (Comic c in _comics)
             {
                 RipComic(c);
-                Thread.Sleep(5 * 1000);
+                Thread.Sleep(2 * 1000);
             }
+
+            // TODO:
+            //      + Write the History.xml file
+            //      + use: http://www.systemnetmail.com/faq/4.4.aspx to embed images in email
         }
 
         // see if we have a history file, with sizes and md5 checksums for previous comic fetch
@@ -71,6 +79,8 @@ namespace ComicStripper
 
             if (match.Success && match.Groups["url"] != null && match.Groups["url"].Success)
             {
+                // TODO: these need to go on the Comic object, not strings to be lost to the void!
+
                 string url = match.Groups["url"].Value;
                 // this will handle the comic strip URL being absolute OR relative, and give you an absolute in the end
                 Uri comicUri = new Uri(new Uri(c.Url), new Uri(url, UriKind.RelativeOrAbsolute));                
@@ -86,37 +96,51 @@ namespace ComicStripper
                 if (comicSize != c.PreviousImgSize) // different size, do the comic
                 {
                     c.PreviousImgUrl = comicUri.ToString();
-                    HttpWebRequest req = WebRequest.Create(comicUri) as HttpWebRequest;
-                    req.Method = "GET";
-                    req.UserAgent = Settings.Default.UserAgent;
-                    using (WebResponse resp = req.GetResponse())
-                    using (StreamReader sr = new StreamReader(resp.GetResponseStream()))
-                    {
-                        // TODO:
-                        //      Write the comic image to disk, and store the path in Comic object
-                        //          - thus, refactor code just above this to    
-                        //              FetchUrlToFile(string filePath)
-                        //      Later, use: http://www.systemnetmail.com/faq/4.4.aspx to embed images in email
-
-                    }
+                    c.StripImgFilePath = FetchUrlToFile(comicUri, Path.Combine(
+                        Environment.CurrentDirectory, string.Format(Constants.ComicStripImgFilePath, c.Title)));
                 }
                 else // same size, same comic as last run, don't need to fetch
                 {
                     Logger.WriteLine("Same size as Previous Fetch! Skipping.");
                     c.IsNewComic = false;
                 }
-                
-
-                
             }
             else // regex matched nothing, or didn't find the "url" group!!!
             {
-                Logger.WriteLine("oops!");
-
-                
+                Logger.WriteLine("Regex could not find the strip image!");
             }
+        }
 
-            
+        // do an Http GET of a url, and store results to file. Extension is determined by content type.
+        private string FetchUrlToFile(Uri comicUri, string filePath)
+        {
+            // TODO: try catch
+
+            HttpWebRequest req = WebRequest.Create(comicUri) as HttpWebRequest;
+            req.Method = "GET";
+            req.UserAgent = Settings.Default.UserAgent;
+            using (WebResponse resp = req.GetResponse())
+            using (Stream responseStream = resp.GetResponseStream())
+            {
+                // file extension
+                string ext = ImageType.GetExtension(resp.ContentType);
+                filePath += "." + ext;
+
+                using (FileStream fs = File.Create(filePath))
+                {
+
+                    // read 32K of the stream at a time, writing to file
+                    Byte[] buffer = new Byte[32 * 1024];
+                    int read = responseStream.Read(buffer, 0, buffer.Length);
+                    while (read > 0)
+                    {
+                        fs.Write(buffer, 0, read);
+                        read = responseStream.Read(buffer, 0, buffer.Length);
+                    }
+                }
+
+                return filePath;
+            }
         }
 
         // do an Http GET request of a url, and return the results as a string (good for HTML pages)
@@ -137,6 +161,8 @@ namespace ComicStripper
         // do an Http HEAD request to get the size of an object without fetching it
         private long FetchUrlContentSize(Uri comicUri, string referer)
         {
+            // TODO: try catch
+
             HttpWebRequest req = WebRequest.Create(comicUri) as HttpWebRequest;
             req.Method = "HEAD";
             req.UserAgent = Settings.Default.UserAgent;
