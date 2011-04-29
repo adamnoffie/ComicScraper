@@ -13,7 +13,6 @@ namespace ComicStripper
 {
     class ComicStripper
     {
-        string _emailBody = "";
         string _configFilePath = Path.Combine(Environment.CurrentDirectory, Constants.ComicsFile);
         string _historyFilePath = Path.Combine(Environment.CurrentDirectory, Constants.ComicsHistoryFile);
         
@@ -25,27 +24,79 @@ namespace ComicStripper
         /// </summary>
         public void Run()
         {
-            // read in configuration file, and history file if there is one
+            // 1. read in configuration file, and history file if there is one
             if (!ReadConfigFile())
                 return;
             ReadHistoryFile();
 
-            // create directory for storing images if it doesn't exist
+            // 2. create directory for storing images if it doesn't exist
             if (!Directory.Exists(Path.Combine(Environment.CurrentDirectory, Constants.ComicStripImgPath)))
                 Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, Constants.ComicStripImgPath));
 
+            // 3. strip the comics from the sites, storing to disk
             foreach (Comic c in _comics)
             {
                 RipComic(c);
-                Thread.Sleep(2 * 1000);
+                Thread.Sleep(1 * 1000);
             }
 
-            // TODO:
-            //      + Write the History.xml file
-            //      + use: http://www.systemnetmail.com/faq/4.4.aspx to embed images in email
+            // 4. write the history file back out (with new PreviousImgSize and PreviousImgUrl values of _comics)
+            WriteHistoryFile();
+
+            // 5. compose an email with new comic images embedded, and send it to addresses specified in config file
+            ComicEmailer.SendEmails(_comics.Where(x => x.IsNewComic));
         }
 
-        // see if we have a history file, with sizes and md5 checksums for previous comic fetch
+        // rip a comic from the site
+        private void RipComic(Comic c)
+        {
+            Logger.WriteLine("-- Stripping {0} ", c.Title);
+
+            // get the page that has the comic
+            string pageHtml = HttpFetch.UrlAsString(c.Url, Settings.Default.UserAgent);
+
+            // get the comic image url
+            var r = new Regex(c.SearchRegex, RegexOptions.Singleline | RegexOptions.IgnoreCase);
+            var match = r.Match(pageHtml);
+
+            if (match.Success && match.Groups["url"] != null && match.Groups["url"].Success)
+            {
+                string url = match.Groups["url"].Value;
+                // this will handle the comic strip URL being absolute OR relative, and give you an absolute in the end
+                Uri comicUri = new Uri(new Uri(c.Url), new Uri(url, UriKind.RelativeOrAbsolute));                
+                c.ToolTip = match.Groups["title"].Value;
+                c.AltText = match.Groups["alt"].Value;
+
+                // quickly get (using HEAD) the strip image's size, then see if it is different comic
+                // NOTE: this assumes different size is different comic, same size is same comic
+                // I'm assuming it is very unlikely that two strips in a row for same comic would be exact same size in bytes
+                int comicSize = (int)HttpFetch.UrlContentSize(comicUri, Settings.Default.UserAgent, c.Url);
+                if (comicSize != c.PreviousImgSize) // different size, do the comic
+                {
+                    c.PreviousImgSize = comicSize;
+                    c.PreviousImgUrl = comicUri.ToString();
+                    string filePath = Path.Combine(Environment.CurrentDirectory, string.Format(Constants.ComicStripImgFilePath, c.Title));
+                    c.StripImgFilePath = HttpFetch.UrlToFile(comicUri, filePath, Settings.Default.UserAgent, c.Url);
+                }
+                else // same size, same comic as last run, don't need to fetch
+                {
+                    Logger.WriteLine("!! Same size as Previous Fetch! Skipping.");
+                    c.IsNewComic = false;
+                }
+            }
+            else // regex matched nothing, or didn't find the "url" group!!!
+            {
+                Logger.WriteLine("!! Regex could not find the strip image!");
+            }
+        }
+
+        // write history file (xml)
+        private void WriteHistoryFile()
+        {
+            _comics.ToXmlFile(_historyFilePath);
+        }
+
+        // see if we have a history file, with info about previous fetches of each comic, if existing
         private void ReadHistoryFile()
         {
             if (File.Exists(_historyFilePath))
@@ -63,122 +114,14 @@ namespace ComicStripper
                     }
                 }
             }
-        }
-
-        // rip a comic from the site
-        private void RipComic(Comic c)
-        {
-            Logger.WriteLine("== Stripping {0} == {1} ==", c.Title, c.Url);
-
-            // get the page that has the comic
-            string pageHtml = FetchUrlAsString(c.Url);
-
-            // get the comic image url
-            var r = new Regex(c.SearchRegex, RegexOptions.Singleline | RegexOptions.IgnoreCase);
-            var match = r.Match(pageHtml);
-
-            if (match.Success && match.Groups["url"] != null && match.Groups["url"].Success)
-            {
-                // TODO: these need to go on the Comic object, not strings to be lost to the void!
-
-                string url = match.Groups["url"].Value;
-                // this will handle the comic strip URL being absolute OR relative, and give you an absolute in the end
-                Uri comicUri = new Uri(new Uri(c.Url), new Uri(url, UriKind.RelativeOrAbsolute));                
-                string title = match.Groups["title"].Value;
-                string alt = match.Groups["alt"].Value;
-
-                Logger.WriteLine("url: {0}, title: {1}, alt: {2}", comicUri, title, alt);
-
-                // quickly get (using HEAD) the strip image's size, then see if it is different comic
-                // NOTE: this assumes different size is different comic, same size is same comic
-                // it is highly unlikely that two strips in a row, by same author, would be exact same size in bytes
-                int comicSize = (int)FetchUrlContentSize(comicUri, c.Url);
-                if (comicSize != c.PreviousImgSize) // different size, do the comic
-                {
-                    c.PreviousImgUrl = comicUri.ToString();
-                    c.StripImgFilePath = FetchUrlToFile(comicUri, Path.Combine(
-                        Environment.CurrentDirectory, string.Format(Constants.ComicStripImgFilePath, c.Title)));
-                }
-                else // same size, same comic as last run, don't need to fetch
-                {
-                    Logger.WriteLine("Same size as Previous Fetch! Skipping.");
-                    c.IsNewComic = false;
-                }
-            }
-            else // regex matched nothing, or didn't find the "url" group!!!
-            {
-                Logger.WriteLine("Regex could not find the strip image!");
-            }
-        }
-
-        // do an Http GET of a url, and store results to file. Extension is determined by content type.
-        private string FetchUrlToFile(Uri comicUri, string filePath)
-        {
-            // TODO: try catch
-
-            HttpWebRequest req = WebRequest.Create(comicUri) as HttpWebRequest;
-            req.Method = "GET";
-            req.UserAgent = Settings.Default.UserAgent;
-            using (WebResponse resp = req.GetResponse())
-            using (Stream responseStream = resp.GetResponseStream())
-            {
-                // file extension
-                string ext = ImageType.GetExtension(resp.ContentType);
-                filePath += "." + ext;
-
-                using (FileStream fs = File.Create(filePath))
-                {
-
-                    // read 32K of the stream at a time, writing to file
-                    Byte[] buffer = new Byte[32 * 1024];
-                    int read = responseStream.Read(buffer, 0, buffer.Length);
-                    while (read > 0)
-                    {
-                        fs.Write(buffer, 0, read);
-                        read = responseStream.Read(buffer, 0, buffer.Length);
-                    }
-                }
-
-                return filePath;
-            }
-        }
-
-        // do an Http GET request of a url, and return the results as a string (good for HTML pages)
-        private string FetchUrlAsString(string url)
-        {
-            // TODO: try catch, return null or string.Emtpy on error
-
-            HttpWebRequest req = WebRequest.Create(url) as HttpWebRequest;
-            req.Method = "GET";
-            req.UserAgent = Settings.Default.UserAgent;
-            using (WebResponse resp = req.GetResponse())
-            using (StreamReader sr = new StreamReader(resp.GetResponseStream()))
-            {
-                return sr.ReadToEnd();
-            }
-        }
-
-        // do an Http HEAD request to get the size of an object without fetching it
-        private long FetchUrlContentSize(Uri comicUri, string referer)
-        {
-            // TODO: try catch
-
-            HttpWebRequest req = WebRequest.Create(comicUri) as HttpWebRequest;
-            req.Method = "HEAD";
-            req.UserAgent = Settings.Default.UserAgent;
-            req.Referer = referer;
-            using (WebResponse resp = req.GetResponse())
-            {
-                return resp.ContentLength;
-            }
-        }
+        } 
 
         // Read the Comics.txt configuration file to get regexes and comics to strip
         private bool ReadConfigFile()
         {
             if (!File.Exists(_configFilePath))
             {
-                Logger.WriteLine("No Comic Config File (Comics.txt)! Exiting.");
+                Logger.WriteLine("!! No Comic Config File (Comics.txt)! Exiting.");
                 return false;
             }
 
@@ -187,42 +130,50 @@ namespace ComicStripper
 
             for (int i = 0; i < lines.Length; i++)
             {
-                string line = lines[i].Trim();
-
-                if (line.StartsWith("#") || string.IsNullOrEmpty(line))     // comment or blank line
-                    continue;
-                else if (line.StartsWith("["))                              // section header
-                    currentSection = line.Trim('[', ']').ToLower();
-                else                                                        // regex or comic definition
+                try
                 {
-                    string[] parts = line.Split(',');
-                    if (currentSection == Constants.Sections.Regex) // regex
-                    {
-                        var cr = new ComicStripRegex();
-                        cr.Name = parts[0];
-                        cr.Regex = parts[1];
-                        _regexes.Add(cr);
-                    }
-                    else // comic
-                    {
-                        var c = new Comic();
-                        c.Title = parts[0];
-                        c.Url = parts[1];
-                        if (parts[2].ToLower().StartsWith("rgx")) // rgxXXXXX variable
-                        {
-                            var regex = _regexes.Where(x => x.Name.ToLower() == parts[2].ToLower()).FirstOrDefault();
-                            if (regex == null)
-                            {
-                                Logger.WriteLine("No regex with name {0}!", parts[2]);
-                                return false;
-                            }
-                            c.SearchRegex = regex.Regex;
-                        }
-                        else
-                            c.SearchRegex = parts[2]; // per-comic regex
+                    string line = lines[i].Trim();
 
-                        _comics.Add(c);
+                    if (line.StartsWith("#") || string.IsNullOrEmpty(line))     // comment or blank line
+                        continue;
+                    else if (line.StartsWith("["))                              // section header
+                        currentSection = line.Trim('[', ']').ToLower();
+                    else                                                        // regex or comic definition
+                    {
+                        string[] parts = line.Split(new char[] {','}, StringSplitOptions.RemoveEmptyEntries);
+                        if (currentSection == Constants.Sections.Regex) // regex
+                        {
+                            var cr = new ComicStripRegex();
+                            cr.Name = parts[0].Trim();
+                            cr.Regex = parts[1].Trim();
+                            _regexes.Add(cr);
+                        }
+                        else // comic
+                        {
+                            var c = new Comic();
+                            c.Title = parts[0].Trim();
+                            c.Url = parts[1].Trim();
+                            string regVal = parts[2].Trim();
+                            if (regVal.ToLower().StartsWith("rgx")) // rgxXXXXX variable
+                            {
+                                var regex = _regexes.Where(x => x.Name.ToLower() == regVal.ToLower()).FirstOrDefault();
+                                if (regex == null)
+                                {
+                                    Logger.WriteLine("!! No regex with name {0}!", regVal);
+                                    return false;
+                                }
+                                c.SearchRegex = regex.Regex;
+                            }
+                            else
+                                c.SearchRegex = parts[2]; // per-comic regex
+
+                            _comics.Add(c);
+                        }
                     }
+                }
+                catch (Exception e)
+                {
+                    Logger.WriteLine("!! Error reading config file [line {0}]: Exception {1}: {2}", i + 1, e.ToString(), e.Message);
                 }
             }
 

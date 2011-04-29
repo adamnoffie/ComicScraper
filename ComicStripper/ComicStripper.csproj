@@ -32,6 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -46,9 +47,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Comic.cs" />
+    <Compile Include="ComicEmailer.cs" />
     <Compile Include="ComicStripper.cs" />
     <Compile Include="ComicStripRegex.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="Util\EmailSender.cs" />
+    <Compile Include="Util\HttpFetch.cs" />
     <Compile Include="Util\ImageType.cs" />
     <Compile Include="Util\Logger.cs" />
     <Compile Include="Program.cs" />

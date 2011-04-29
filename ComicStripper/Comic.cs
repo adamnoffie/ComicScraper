@@ -17,8 +17,8 @@ namespace ComicStripper
         public string Title { get; set; }
 
         /// <summary>
-        /// Url to the PAGE with the latest edition of the strip
-        /// <example>http://comics.com/pearls_before_swine</example>
+        /// Url to the PAGE with the latest edition of the strip,
+        /// <example>e.g. http://comics.com/pearls_before_swine</example>
         /// </summary>
         [XmlIgnore]
         public string Url { get; set; }
@@ -31,6 +31,25 @@ namespace ComicStripper
         /// </summary>
         [XmlIgnore]
         public string SearchRegex { get; set; }
+
+        /// <summary>
+        /// Used for identifying the image as it is embedded in an email
+        /// </summary>
+        [XmlIgnore]
+        public string ContentID { get { return Title.Replace(" ", "") + "_" + _contentIDGuid; } }
+        private string _contentIDGuid;
+
+        /// <summary>
+        /// alt attribute on the stripped img tag
+        /// </summary>
+        [XmlIgnore]
+        public string AltText { get; set; }
+
+        /// <summary>
+        /// title attribute on the stripped img tag
+        /// </summary>
+        [XmlIgnore]
+        public string ToolTip { get; set; }
 
         [XmlAttribute]
         public string PreviousImgUrl { get; set; }
@@ -49,7 +68,9 @@ namespace ComicStripper
             Title = Url = SearchRegex = PreviousImgUrl =
                 string.Empty;
             PreviousImgSize = -1;
-            IsNewComic = false;
+            IsNewComic = true;
+
+            _contentIDGuid = Guid.NewGuid().ToString().Substring(0, 8);
         }
     }
 }
