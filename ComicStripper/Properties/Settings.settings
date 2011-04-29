@@ -6,10 +6,10 @@
       <Value Profile="(Default)">Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/525.19 (KHTML, like Gecko) Chrome/0.4.154.22 Safari/525.19</Value>
     </Setting>
     <Setting Name="EmailToAddresses" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">Adam Nofsinger &lt;adam@anofsinger.com&gt;; Adam Nofsinger &lt;anofsinger@leerinc.com&gt;</Value>
+      <Value Profile="(Default)">Adam Nofsinger &lt;adam@anofsinger.com&gt;, Adam Nofsinger &lt;anofsinger@leerinc.com&gt;</Value>
     </Setting>
-    <Setting Name="Setting" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+    <Setting Name="EmailUseSSL" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
 </SettingsFile>

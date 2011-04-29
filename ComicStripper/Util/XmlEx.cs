@@ -14,7 +14,7 @@ namespace Util
         public static void ToXmlFile<T>(this T source, string filePath)
         {
             XmlSerializer s = new XmlSerializer(typeof(T));
-            using (FileStream fs = File.OpenWrite(filePath))
+            using (FileStream fs = File.Create(filePath))
             {
                 s.Serialize(fs, source);
             }

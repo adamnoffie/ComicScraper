@@ -6,7 +6,7 @@ using System.Text;
 namespace Util
 {
     /// <summary>
-    /// This class is mostly here to make converting this to a non-Console app easier. 
+    /// This class is mostly here to make converting this to a non-Console app, if desired, easier. 
     /// I figured Interface classes and Dependency Injection might be overkill for the script.
     /// </summary>
     static class Logger
