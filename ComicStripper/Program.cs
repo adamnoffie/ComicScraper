@@ -13,7 +13,8 @@ namespace ComicStripper
             ComicStripper cs = new ComicStripper();
             cs.Run();         
    
-            // TODO, remove this:
+            // TODO: remove this???
+            Console.WriteLine("   DONE. Hit <ENTER> to quit...");
             Console.Read();
         }
     }
