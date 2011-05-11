@@ -3,10 +3,10 @@
 
 [regex]
 # 0 - Name (must start with "rgx"), 1 - Regex
-rgxComics,class="STR_StripImage".*?title="(?<title>.*?)".*?<img src="(?<url>.*?)".*?alt="(?<alt>.*?)".*?/>
-rgxGoComics,<p class="feature_item">.*?src='(?<url>.*?)'.*?alt='(?<alt>.*?)'(?<title>)
-rgxArcaMax,(?<!comicfull".*?<img )src="(?<url>/newspics/.*?)".*?alt="(?<alt>.*?)"(?<title>)
-rgxChron,src="(?<url>http://cst\.rbma\.com/content/.*?)"(?<alt>)(?<title>)
+rgxComics,class=['"]STR_StripImage['"].*?title=['"](?<title>.*?)['"].*?<img src=['"](?<url>.*?)['"].*?alt=['"](?<alt>.*?)['"].*?/>
+rgxGoComics,<p class=['"]feature_item['"]>.*?alt=['"](?<alt>.*?)['"].*?src=['"](?<url>.*?)['"](?<title>)
+rgxArcaMax,(?<!comicfull['"].*?<img )src=['"](?<url>/newspics/.*?)['"].*?alt=['"](?<alt>.*?)['"](?<title>)
+rgxChron,src=['"](?<url>http://cst\.rbma\.com/content/.*?)['"](?<alt>)(?<title>)
 
 [comics]
 # 0 - Title, 1 - URL, 2 - Regex
