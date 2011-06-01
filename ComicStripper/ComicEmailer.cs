@@ -41,9 +41,12 @@ namespace ComicStripper
             // embed the images for the comics in the html view
             foreach (Comic c in comics)
             {
-                LinkedResource img = new LinkedResource(c.StripImgFilePath);
-                img.ContentId = c.ContentID;
-                htmlView.LinkedResources.Add(img);
+                if (!string.IsNullOrEmpty(c.StripImgFilePath))
+                {
+                    LinkedResource img = new LinkedResource(c.StripImgFilePath);
+                    img.ContentId = c.ContentID;
+                    htmlView.LinkedResources.Add(img);
+                }
             }
 
             // plain text version of email
