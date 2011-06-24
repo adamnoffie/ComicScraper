@@ -10,6 +10,8 @@ namespace ComicStripper
 {
     public static class ComicEmailer
     {
+        public const int MaxAttempts = 3;
+
         /// <summary>
         /// Compose an email with comic images embedded, and send it to addresses specified in config file
         /// </summary>
@@ -54,10 +56,26 @@ namespace ComicStripper
                 "Your email viewer does not support HTML, which will make looking at this email pointless!",
                 null, "text/plain");
 
-            // send the email!
             msg.AlternateViews.Add(plainView);
             msg.AlternateViews.Add(htmlView);
-            EmailSender.SendEmail(msg, Settings.Default.EmailToAddresses, subject, Settings.Default.EmailUseSSL);
+
+            // send the email!
+            int attempts = 0;
+            bool success = false;
+            while (!success && attempts < MaxAttempts)
+            {
+                try
+                {
+                    EmailSender.SendEmail(msg, Settings.Default.EmailToAddresses, subject, Settings.Default.EmailUseSSL);
+                    success = true;
+                }
+                catch (Exception ex)
+                {
+                    attempts++;
+                    Logger.WriteLine("Exception: " + ex.Message);
+                    Logger.WriteLine("Trying again...");
+                }
+            }
         }
     }
 }

@@ -38,20 +38,20 @@ namespace ComicStripper
             {
                 RipComic(c);
                 Thread.Sleep(1 * 1000);
-            }
+            }            
 
-            // 4. write the history file back out (with new PreviousImgSize and PreviousImgUrl values of _comics)
-            WriteHistoryFile();
-
-            // 5. compose an email with new comic images embedded, and send it to addresses specified in config file
+            // 4. compose an email with new comic images embedded, and send it to addresses specified in config file
             var newComics = _comics.Where(x => x.IsNewComic);
             if (newComics.Count() > 0)
             {
                 Logger.WriteLine("   Sending email to {0}", Settings.Default.EmailToAddresses);
-                ComicEmailer.SendEmails(_comics.Where(x => x.IsNewComic));
+                ComicEmailer.SendEmails(newComics);
             }
             else
                 Logger.WriteLine("!! No new comics, skipping email!");
+
+            // 5. write the history file back out (with new PreviousImgSize and PreviousImgUrl values of _comics)
+            WriteHistoryFile();
         }
 
         // rip a comic from the site
