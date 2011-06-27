@@ -61,6 +61,11 @@ namespace ComicStripper
 
             // get the page that has the comic
             string pageHtml = HttpFetch.UrlAsString(c.Url, Settings.Default.UserAgent);
+            if (pageHtml == null)
+            {
+                Logger.WriteLine("!! Http Fetch for page failed!");
+                return;
+            }
 
             // get the comic image url
             var r = new Regex(c.SearchRegex, RegexOptions.Singleline | RegexOptions.IgnoreCase);
