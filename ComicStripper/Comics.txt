@@ -12,7 +12,7 @@ rgxChron,src=['"](?<url>http://cst\.rbma\.com/content/.*?)['"](?<alt>)(?<title>)
 # if the regex starts with "rgx" does a lookup above instead of using it literally
 
 ## comics
-Rex Morgan, http://www.chron.com/apps/comics/showComick.mpl?name=Rex_Morgan, rgxChron
+Rex Morgan, http://www.chron.com/entertainment/comics-games/comic/Rex-Morgan/, rgxChron
 Flying McCoys, http://www.gocomics.com/theflyingmccoys, rgxGoComics
 Pearls Before Swine, http://www.gocomics.com/pearlsbeforeswine, rgxGoComics
 Speed Bump, http://www.gocomics.com/speedbump, rgxGoComics
@@ -37,12 +37,12 @@ Rose Is Rose, http://www.gocomics.com/roseisrose, rgxGoComics
 Heart of the City, http://www.gocomics.com/heartofthecity, rgxGoComics
 Baby Blues, http://www.arcamax.com/thefunnies/babyblues/, rgxArcaMax
 Buckets, http://www.gocomics.com/thebuckets, rgxGoComics
-Crankshaft, http://www.chron.com/apps/comics/showComick.mpl?name=Crankshaft, rgxChron
+Crankshaft, http://www.chron.com/entertainment/comics-games/comic/Crankshaft/, rgxChron
 Zits, http://www.arcamax.com/thefunnies/zits/, rgxArcaMax
 Arlo and Janis, http://www.gocomics.com/arloandjanis, rgxGoComics
 Beetle Baily, http://www.arcamax.com/thefunnies/beetlebailey/, rgxArcaMax
 Frank & Ernest, http://www.gocomics.com/frankandernest, rgxGoComics
-Sally Forth, http://www.chron.com/apps/comics/showComick.mpl?name=Sally_Forth, rgxChron
+Sally Forth, http://www.chron.com/entertainment/comics-games/comic/Sally-Forth/, rgxChron
 BC, http://www.gocomics.com/bc, rgxGoComics
 
 
