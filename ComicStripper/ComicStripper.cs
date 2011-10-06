@@ -48,7 +48,7 @@ namespace ComicStripper
                 ComicEmailer.SendEmails(newComics);
             }
             else
-                Logger.WriteLine("!! No new comics, skipping email!");
+                Logger.WriteLine("!!   No new comics, skipping email!");
 
             // 5. write the history file back out (with new PreviousImgSize and PreviousImgUrl values of _comics)
             WriteHistoryFile();
@@ -63,7 +63,7 @@ namespace ComicStripper
             string pageHtml = HttpFetch.UrlAsString(c.Url, Settings.Default.UserAgent);
             if (pageHtml == null)
             {
-                Logger.WriteLine("!! Http Fetch for page failed!");
+                Logger.WriteLine("!!   Http Fetch for page failed!");
                 return;
             }
 
@@ -92,13 +92,13 @@ namespace ComicStripper
                 }
                 else // same size, same comic as last run, don't need to fetch
                 {
-                    Logger.WriteLine("!! Same size as Previous Fetch! Skipping.");
+                    Logger.WriteLine("     Same size as Previous Fetch. Skipping.");
                     c.IsNewComic = false;
                 }
             }
             else // regex matched nothing, or didn't find the "url" group!!!
             {
-                Logger.WriteLine("!! Regex could not find the strip image!");
+                Logger.WriteLine("!!   Regex could not find the strip image!");
             }
         }
 
@@ -133,7 +133,7 @@ namespace ComicStripper
         {
             if (!File.Exists(_configFilePath))
             {
-                Logger.WriteLine("!! No Comic Config File (Comics.txt)! Exiting.");
+                Logger.WriteLine("!!   No Comic Config File (Comics.txt)! Exiting.");
                 return false;
             }
 
@@ -171,7 +171,7 @@ namespace ComicStripper
                                 var regex = _regexes.Where(x => x.Name.ToLower() == regVal.ToLower()).FirstOrDefault();
                                 if (regex == null)
                                 {
-                                    Logger.WriteLine("!! No regex with name {0}!", regVal);
+                                    Logger.WriteLine("!!   No regex with name {0}!", regVal);
                                     return false;
                                 }
                                 c.SearchRegex = regex.Regex;
@@ -185,7 +185,7 @@ namespace ComicStripper
                 }
                 catch (Exception e)
                 {
-                    Logger.WriteLine("!! Error reading config file [line {0}]: Exception {1}: {2}", i + 1, e.ToString(), e.Message);
+                    Logger.WriteLine("!!   Error reading config file [line {0}]: Exception {1}: {2}", i + 1, e.ToString(), e.Message);
                 }
             }
 
