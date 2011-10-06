@@ -5,49 +5,38 @@
 # 0 - Name (must start with "rgx"), 1 - Regex
 rgxGoComics,<p class=['"]feature_item['"]>.*?alt=['"](?<alt>.*?)['"].*?src=['"](?<url>.*?)['"](?<title>)
 rgxArcaMax,(?<!comicfull['"].*?<img )src=['"](?<url>/newspics/.*?)['"].*?alt=['"](?<alt>.*?)['"](?<title>)
-rgxChron,src=['"](?<url>http://cst\.rbma\.com/content/.*?)['"](?<alt>)(?<title>)
 
 [comics]
 # 0 - Title, 1 - URL, 2 - Regex
 # if the regex starts with "rgx" does a lookup above instead of using it literally
 
 ## comics
-Rex Morgan, http://www.chron.com/entertainment/comics-games/comic/Rex-Morgan/, rgxChron
 Flying McCoys, http://www.gocomics.com/theflyingmccoys, rgxGoComics
 Pearls Before Swine, http://www.gocomics.com/pearlsbeforeswine, rgxGoComics
 Speed Bump, http://www.gocomics.com/speedbump, rgxGoComics
 Non Sequitur, http://www.arcamax.com/thefunnies/nonsequitur/, rgxArcaMax
 Real Life Adventures, http://www.gocomics.com/reallifeadventures, rgxGoComics
-Get Fuzzy, http://www.gocomics.com/getfuzzy, rgxGoComics
 Dilbert, http://www.arcamax.com/thefunnies/dilbert/, rgxArcaMax
-    #### OLD REGEX, dilbert.com: src="(?<url>http://dilbert\.com/dyn/str_strip/.*?\.gif)".*?alt="(?<alt>.*?)"(?<title>)
 Foxtrot, http://www.gocomics.com/foxtrot, rgxGoComics
-    #### OLD REGEX, foxtrot.com: <img src="(?<url>http://www.foxtrot.com/comics/.*?\.gif)".*?alt="(?<alt>.*?)".*?title="(?<title>.*?)"
-Hagar the Horrible, http://www.arcamax.com/thefunnies/hagarthehorrible/, rgxArcaMax
 Cul De Sac, http://www.gocomics.com/culdesac, rgxGoComics
 F Minus, http://www.gocomics.com/fminus, rgxGoComics
 Retail, http://www.retailcomic.com/, src="(?<url>http://www\.retailcomic\.com/comics.*?)".*?alt="(?<alt>.*?)".*?title="(?<title>.*?)"
 Luann, http://www.arcamax.com/thefunnies/luann/, rgxArcaMax
 Garfield, http://www.gocomics.com/garfield, rgxGoComics
 Dustin, http://www.arcamax.com/thefunnies/dustin/, rgxArcaMax
-Frazz, http://www.gocomics.com/frazz, rgxGoComics
 Pooch Cafe, http://www.gocomics.com/poochcafe, rgxGoComics
 Blondie, http://www.arcamax.com/thefunnies/blondie/, rgxArcaMax
 Rose Is Rose, http://www.gocomics.com/roseisrose, rgxGoComics
 Heart of the City, http://www.gocomics.com/heartofthecity, rgxGoComics
 Baby Blues, http://www.arcamax.com/thefunnies/babyblues/, rgxArcaMax
 Buckets, http://www.gocomics.com/thebuckets, rgxGoComics
-Crankshaft, http://www.chron.com/entertainment/comics-games/comic/Crankshaft/, rgxChron
 Zits, http://www.arcamax.com/thefunnies/zits/, rgxArcaMax
 Arlo and Janis, http://www.gocomics.com/arloandjanis, rgxGoComics
-Beetle Baily, http://www.arcamax.com/thefunnies/beetlebailey/, rgxArcaMax
 Frank & Ernest, http://www.gocomics.com/frankandernest, rgxGoComics
-Sally Forth, http://www.chron.com/entertainment/comics-games/comic/Sally-Forth/, rgxChron
 BC, http://www.gocomics.com/bc, rgxGoComics
-
 
 ## webcomics
 
-XKCD,http://xkcd.com,<img src="(?<url>http://imgs\.xkcd\.com/comics/.*?\.png)".*?title="(?<alt>.*?)".*?alt="(?<title>.*?)"
-VG Cats,http://www.vgcats.com/comics/,<img src="(?<url>images/.*\.jpg)"(?<title>)(?<alt>)
+XKCD,http://xkcd.com,<img src="(?<url>http://imgs\.xkcd\.com/comics/.*?\.(?:png|gif|jpeg|jpg))".*?title="(?<alt>.*?)".*?alt="(?<title>.*?)"
+VG Cats,http://www.vgcats.com/comics/,<img src="(?<url>images/.*?\.(?:jpg|png|gif|jpeg))"(?<title>)(?<alt>)
 Penny Arcade,http://www.penny-arcade.com/comic/,<div class="post comic">.*?<img src="(?<url>.*?)".*?alt="(?<title>.*?)"(?<alt>)
