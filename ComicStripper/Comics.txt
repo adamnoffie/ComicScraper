@@ -34,6 +34,8 @@ Zits, http://www.arcamax.com/thefunnies/zits/, rgxArcaMax
 Arlo and Janis, http://www.gocomics.com/arloandjanis, rgxGoComics
 Frank & Ernest, http://www.gocomics.com/frankandernest, rgxGoComics
 BC, http://www.gocomics.com/bc, rgxGoComics
+Prickly City, http://www.gocomics.com/pricklycity/, rgxGoComics
+Mallard Fillmore, http://www.arcamax.com/thefunnies/mallardfillmore/, rgxArcaMax
 
 ## webcomics
 
