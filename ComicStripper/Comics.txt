@@ -14,7 +14,6 @@ rgxArcaMax,(?<!comicfull['"].*?<img )src=['"](?<url>/newspics/.*?)['"].*?alt=['"
 Flying McCoys, http://www.gocomics.com/theflyingmccoys, rgxGoComics
 Pearls Before Swine, http://www.gocomics.com/pearlsbeforeswine, rgxGoComics
 Speed Bump, http://www.gocomics.com/speedbump, rgxGoComics
-Non Sequitur, http://www.arcamax.com/thefunnies/nonsequitur/, rgxArcaMax
 Real Life Adventures, http://www.gocomics.com/reallifeadventures, rgxGoComics
 Dilbert, http://www.arcamax.com/thefunnies/dilbert/, rgxArcaMax
 Foxtrot, http://www.gocomics.com/foxtrot, rgxGoComics
