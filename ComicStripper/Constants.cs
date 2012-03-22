@@ -14,6 +14,7 @@ title='[[ALTTEXT]]' alt='[[TITLE]]' ></a></p><br>[[ALTTEXT]]";
 
         public const string ComicsFile = "Comics.txt";
         public const string ComicsHistoryFile = "History.xml";
+        public const string ComicsLogFile = "Log.txt";
         
         public const string ComicStripImgPath = "Comics\\";
 

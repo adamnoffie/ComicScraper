@@ -14,8 +14,8 @@ namespace ComicStripper
             cs.Run();         
    
             // TODO: remove this???
-            Console.WriteLine("   DONE. Hit <ENTER> to quit...");
-            Console.Read();
+            //Console.WriteLine("   DONE. Hit <ENTER> to quit...");
+            //Console.Read();
         }
     }
 }
