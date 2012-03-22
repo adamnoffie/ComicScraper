@@ -24,10 +24,11 @@ namespace ComicStripper
         /// </summary>
         public void Run()
         {
-            // 1. read in configuration file, and history file if there is one
+            // 1. read in configuration file, and history file if there is one; set log file path
             if (!ReadConfigFile())
                 return;
             ReadHistoryFile();
+            Logger.LogFilePath = Path.Combine(Environment.CurrentDirectory, Constants.ComicsLogFile);
 
             // 2. create directory for storing images if it doesn't exist
             if (!Directory.Exists(Path.Combine(Environment.CurrentDirectory, Constants.ComicStripImgPath)))
