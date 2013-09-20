@@ -3,8 +3,8 @@
 
 [regex]
 # 0 - Name (must start with "rgx"), 1 - Regex
-rgxGoComics,<p class=['"]feature_item['"]>.*?alt=['"](?<alt>.*?)['"].*?src=['"](?<url>.*?)['"](?<title>)
-rgxArcaMax,(?<!comicfull['"].*?<img )src=['"](?<url>/newspics/.*?)['"].*?alt=['"](?<alt>.*?)['"](?<title>)
+rgxGoComics,<p class=['"]feature_item['"].*?alt=['"](?<alt>.*?)['"].*?src=['"](?<url>.*?)['"](?<title>)
+rgxArcaMax,<img.*?src=['"](?<url>/newspics/.*?)['"].*?alt=['"](?<alt>.*?)['"](?<title>)
 
 [comics]
 # 0 - Title, 1 - URL, 2 - Regex
@@ -18,23 +18,12 @@ Real Life Adventures, http://www.gocomics.com/reallifeadventures, rgxGoComics
 Dilbert, http://www.arcamax.com/thefunnies/dilbert/, rgxArcaMax
 Foxtrot, http://www.gocomics.com/foxtrot, rgxGoComics
 Cul De Sac, http://www.gocomics.com/culdesac, rgxGoComics
-F Minus, http://www.gocomics.com/fminus, rgxGoComics
-Retail, http://www.retailcomic.com/, src="(?<url>http://www\.retailcomic\.com/comics.*?)".*?alt="(?<alt>.*?)".*?title="(?<title>.*?)"
-Luann, http://www.arcamax.com/thefunnies/luann/, rgxArcaMax
-Garfield, http://www.gocomics.com/garfield, rgxGoComics
-Dustin, http://www.arcamax.com/thefunnies/dustin/, rgxArcaMax
-Pooch Cafe, http://www.gocomics.com/poochcafe, rgxGoComics
-Blondie, http://www.arcamax.com/thefunnies/blondie/, rgxArcaMax
-Rose Is Rose, http://www.gocomics.com/roseisrose, rgxGoComics
-Heart of the City, http://www.gocomics.com/heartofthecity, rgxGoComics
+Retail, http://www.retailcomic.com/, src=["'](?<url>http://safr\.kingfeatures\.com/idn.*?)["'].*?(?<alt>)(?<title>)
 Baby Blues, http://www.arcamax.com/thefunnies/babyblues/, rgxArcaMax
 Buckets, http://www.gocomics.com/thebuckets, rgxGoComics
-Zits, http://www.arcamax.com/thefunnies/zits/, rgxArcaMax
 Arlo and Janis, http://www.gocomics.com/arloandjanis, rgxGoComics
-Frank & Ernest, http://www.gocomics.com/frankandernest, rgxGoComics
-BC, http://www.gocomics.com/bc, rgxGoComics
-Prickly City, http://www.gocomics.com/pricklycity/, rgxGoComics
 Mallard Fillmore, http://www.arcamax.com/thefunnies/mallardfillmore/, rgxArcaMax
+Chip Bok, http://www.arcamax.com/politics/chipbok/, rgxArcaMax
 
 ## webcomics
 
