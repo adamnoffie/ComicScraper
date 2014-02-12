@@ -29,4 +29,4 @@ Chip Bok, http://www.arcamax.com/politics/chipbok/, rgxArcaMax
 
 XKCD,http://xkcd.com,<img src="(?<url>http://imgs\.xkcd\.com/comics/.*?\.(?:png|gif|jpeg|jpg))".*?title="(?<alt>.*?)".*?alt="(?<title>.*?)"
 VG Cats,http://www.vgcats.com/comics/,<img src="(?<url>images/.*?\.(?:jpg|png|gif|jpeg))"(?<title>)(?<alt>)
-Penny Arcade,http://www.penny-arcade.com/comic/,<div class="post comic">.*?<img src="(?<url>.*?)".*?alt="(?<title>.*?)"(?<alt>)
+Penny Arcade,http://www.penny-arcade.com/comic/,<div id="comicFrame">.*?<img src="(?<url>.*?)".*?alt="(?<title>.*?)"(?<alt>)
