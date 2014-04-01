@@ -4,7 +4,7 @@
 [regex]
 # 0 - Name (must start with "rgx"), 1 - Regex
 rgxGoComics,<p class=['"]feature_item['"].*?alt=['"](?<alt>.*?)['"].*?src=['"](?<url>.*?)['"](?<title>)
-rgxArcaMax,<img.*?src=['"](?<url>/newspics/.*?)['"].*?alt=['"](?<alt>.*?)['"](?<title>)
+rgxArcaMax,<img.*?src=['"](?<url>http://www\.arcamax\.com/newspics/.*?)['"].*?alt=['"](?<alt>.*?)['"](?<title>)
 
 [comics]
 # 0 - Title, 1 - URL, 2 - Regex
