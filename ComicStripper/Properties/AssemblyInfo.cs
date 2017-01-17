@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Leer, Inc.")]
 [assembly: AssemblyProduct("ComicStripper")]
-[assembly: AssemblyCopyright("Copyright © Leer, Inc. 2011")]
+[assembly: AssemblyCopyright("Copyright © Adam Nofsinger")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

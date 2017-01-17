@@ -27,7 +27,7 @@ namespace ComicStripper
             foreach (Comic c in comics)
             {
                 emailHtmlBody
-                    .Append("<p style='font-face: Verdana, Georgia; font-size: 11px'><strong>")
+                    .Append("<p style='font-family: Verdana, Georgia; font-size: 9pt'><strong>")
                     .Append(c.Title)
                     .Append("</strong><br /><a href='").Append(c.Url)
                     .Append("' target='_new'><img style='border: none' src='cid:").Append(c.ContentID)
@@ -36,6 +36,10 @@ namespace ComicStripper
                     .Append("'/></a><br />").Append(c.AltText)
                     .Append("</p>").AppendLine();
             }
+            emailHtmlBody.Append("<p style='font-family: Consolas, monospace; font-size: 8pt; color: #767676'>")
+                .Append("--<br/>")
+                .Append(Logger.SessionLog.Replace(Environment.NewLine, "<br/>"))
+                .Append("</p>").AppendLine();
             
             AlternateView htmlView = AlternateView.CreateAlternateViewFromString(emailHtmlBody.ToString(),
                 null, "text/html");
