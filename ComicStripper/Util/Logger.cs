@@ -14,6 +14,9 @@ namespace Util
     {
         public static string LogFilePath { get; set; }
 
+        public static string SessionLog { get { return _sessionLog.ToString(); } }
+        private static StringBuilder _sessionLog = new StringBuilder();
+
         private static bool _firstWrite = true;
 
         public static void Write(object message)
@@ -60,6 +63,7 @@ namespace Util
 
                 // append to Log.txt, creating the file if it doesn't exist
                 File.AppendAllText(LogFilePath, msg, Encoding.ASCII);
+                _sessionLog.Append(msg);
             }
         }
     }
