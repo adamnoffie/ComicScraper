@@ -94,17 +94,21 @@ namespace Util
         {
             try
             {
-                HttpWebRequest req = WebRequest.Create(url) as HttpWebRequest;
+                HttpWebRequest req = WebRequest.Create(new Uri(url)) as HttpWebRequest;
                 req.ReadWriteTimeout = req.Timeout = DefaultTimeout;
                 req.Method = "GET";
                 req.UserAgent = userAgent;
+                if (url.Contains("https"))
+                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls12
+                        | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+                    
                 using (WebResponse resp = req.GetResponse())
                 using (StreamReader sr = new StreamReader(resp.GetResponseStream()))
                 {
                     return sr.ReadToEnd();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return null;
             }
