@@ -1,4 +1,3 @@
-syntax: glob
 *.csproj.user
 *.suo
 bin
