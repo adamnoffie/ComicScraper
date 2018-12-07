@@ -3,7 +3,7 @@
 
 [regex]
 # 0 - Name (must start with "rgx"), 1 - Regex
-rgxGoComics,<picture class=['"]img-fluid item-comic-image['"].*?src=['"](?<url>.*?)['"](?<title>)(?<alt>)
+rgxGoComics,<a itemprop=['"]image.*?<picture class=['"]item-comic-image.*?['"].*?src=['"](?<url>.*?)['"](?<title>)(?<alt>)
 rgxArcaMax,<img.*?comic.*?src=['"](?<url>/newspics/.*?)['"].*?alt=['"](?<alt>.*?)['"](?<title>)
 
 [comics]
@@ -16,12 +16,12 @@ rgxArcaMax,<img.*?comic.*?src=['"](?<url>/newspics/.*?)['"].*?alt=['"](?<alt>.*?
 ##	Speed Bump, http://www.gocomics.com/speedbump, rgxGoComics
 ##	Real Life Adventures, http://www.gocomics.com/reallifeadventures, rgxGoComics
 Dilbert, http://www.arcamax.com/thefunnies/dilbert/, rgxArcaMax
-Foxtrot, http://www.gocomics.com/foxtrot, rgxGoComics
+Foxtrot, https://www.gocomics.com/foxtrot/{yyyy/mm/dd}, rgxGoComics
 ##	Cul De Sac, http://www.gocomics.com/culdesac, rgxGoComics
 ##  Retail, http://www.retailcomic.com/, src=["'](?<url>https://safr\.kingfeatures\.com/idn.*?)["'].*?(?<alt>)(?<title>)
 ##	Baby Blues, http://www.arcamax.com/thefunnies/babyblues/, rgxArcaMax
 ##	Buckets, http://www.gocomics.com/thebuckets, rgxGoComics
-Arlo and Janis, http://www.gocomics.com/arloandjanis, rgxGoComics
+Arlo and Janis, https://www.gocomics.com/arloandjanis/{yyyy/mm/dd}, rgxGoComics
 Mallard Fillmore, http://www.arcamax.com/thefunnies/mallardfillmore/, rgxArcaMax
 Chip Bok, http://www.arcamax.com/politics/chipbok/, rgxArcaMax
 

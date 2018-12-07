@@ -84,7 +84,7 @@ namespace ComicStripper
                 // NOTE: this assumes different size is different comic, same size is same comic
                 // I'm assuming it is very unlikely that two strips in a row for same comic would be exact same size in bytes
                 int comicSize = (int)HttpFetch.UrlContentSize(comicUri, Settings.Default.UserAgent, c.Url);
-                if (comicSize != c.PreviousImgSize) // different size, do the comic
+                if (comicUri.ToString() != c.PreviousImgUrl || comicSize != c.PreviousImgSize) // different url or different size, download comic
                 {
                     c.PreviousImgSize = comicSize;
                     c.PreviousImgUrl = comicUri.ToString();
@@ -93,7 +93,7 @@ namespace ComicStripper
                 }
                 else // same size, same comic as last run, don't need to fetch
                 {
-                    Logger.WriteLine("     Same size as Previous Fetch. Skipping.");
+                    Logger.WriteLine("     Same url and size as Previous Fetch. Skipping.");
                     c.IsNewComic = false;
                 }
             }
