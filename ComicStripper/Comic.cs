@@ -21,7 +21,15 @@ namespace ComicStripper
         /// <example>e.g. http://comics.com/pearls_before_swine</example>
         /// </summary>
         [XmlIgnore]
-        public string Url { get; set; }
+        public string Url {
+            get { return _url; }
+            set {
+                _url = value;
+                ProcessComicUrl();
+            }
+        }
+
+        private string _url;
 
         /// <summary>
         /// Regex string used to search the page for the actual img URL
@@ -72,5 +80,17 @@ namespace ComicStripper
 
             _contentIDGuid = Guid.NewGuid().ToString().Substring(0, 8);
         }
+
+        private const string DatePlaceHolder = "{yyyy/mm/dd}";
+
+        // handles any special indicators in comic url... currently just {{yyyy/mm/dd}}
+        private void ProcessComicUrl()
+        {
+            if (_url.Contains(DatePlaceHolder))
+            {
+                _url = _url.Replace(DatePlaceHolder, DateTime.Now.ToString("yyyy/MM/dd"));
+            }
+        }
+
     }
 }

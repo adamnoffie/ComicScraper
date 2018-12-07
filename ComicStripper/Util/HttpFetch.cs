@@ -108,7 +108,7 @@ namespace Util
                     return sr.ReadToEnd();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return null;
             }

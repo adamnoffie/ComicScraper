@@ -45,7 +45,7 @@ namespace Util
             mesg.IsBodyHtml = isHTML;
             mesg.Body = body;
             if (replyto != null)
-                mesg.ReplyTo = replyto;
+                mesg.ReplyToList.Add(replyto);
 
             // send the email
             SmtpClient smtp = new SmtpClient();     // pulls smtp settings from Web.config
