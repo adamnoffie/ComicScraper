@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace ComicStripper
+namespace ComicScraper
 {
     class Program
     {
         static void Main(string[] args)
         {
-            ComicStripper cs = new ComicStripper();
+            ComicScraper cs = new ComicScraper();
             cs.Run();         
    
             // TODO: remove this???

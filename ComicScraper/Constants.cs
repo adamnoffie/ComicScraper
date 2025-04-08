@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ComicStripper
+namespace ComicScraper
 {
     public static class Constants
     {
