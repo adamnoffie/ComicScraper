@@ -153,19 +153,23 @@ namespace ComicStripper
                         currentSection = line.Trim('[', ']').ToLower();
                     else                                                        // regex or comic definition
                     {
-                        string[] parts = line.Split(new char[] {','}, StringSplitOptions.RemoveEmptyEntries);
+                        string[] parts;
                         if (currentSection == Constants.Sections.Regex) // regex
                         {
-                            var cr = new ComicStripRegex();
-                            cr.Name = parts[0].Trim();
-                            cr.Regex = parts[1].Trim();
+                            parts = line.Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+                            var cr = new ComicStripRegex {
+                                Name = parts[0].Trim(),
+                                Regex = parts[1].Trim()
+                            };
                             _regexes.Add(cr);
                         }
                         else // comic
                         {
-                            var c = new Comic();
-                            c.Title = parts[0].Trim();
-                            c.Url = parts[1].Trim();
+                            parts = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                            var c = new Comic {
+                                Title = parts[0].Trim(),
+                                Url = parts[1].Trim()
+                            };
                             string regVal = parts[2].Trim();
                             if (regVal.ToLower().StartsWith("rgx")) // rgxXXXXX variable
                             {
