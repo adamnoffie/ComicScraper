@@ -156,7 +156,7 @@ namespace ComicStripper
                         string[] parts;
                         if (currentSection == Constants.Sections.Regex) // regex
                         {
-                            parts = line.Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+                            parts = line.Split(new char[] { ',' }, 2, StringSplitOptions.RemoveEmptyEntries);
                             var cr = new ComicStripRegex {
                                 Name = parts[0].Trim(),
                                 Regex = parts[1].Trim()
@@ -165,7 +165,7 @@ namespace ComicStripper
                         }
                         else // comic
                         {
-                            parts = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                            parts = line.Split(new char[] { ',' }, 3, StringSplitOptions.RemoveEmptyEntries);
                             var c = new Comic {
                                 Title = parts[0].Trim(),
                                 Url = parts[1].Trim()
