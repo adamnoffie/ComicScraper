@@ -3,8 +3,8 @@
 
 [regex]
 # 0 - Name (must start with "rgx"), 1 - Regex
-rgxGoComics|rel=['"]preload['"] as=['"]image['"] imageSrcSet=['"](?:[^"]*?,\s*)*(?<url>https://[^,\s]+)\s*.*?['"]
-rgxArcaMax|<img.*?comic.*?src=['"](?<url>.*?/newspics/.*?)['"].*?alt=['"](?<alt>.*?)['"](?<title>)
+rgxGoComics,rel=['"]preload['"] as=['"]image['"] imageSrcSet=['"](?:[^"]*?,\s*)*(?<url>https://[^,\s]+)\s*.*?['"]
+rgxArcaMax,<img.*?comic.*?src=['"](?<url>.*?/newspics/.*?)['"].*?alt=['"](?<alt>.*?)['"](?<title>)
 
 [comics]
 # 0 - Title, 1 - URL, 2 - Regex
