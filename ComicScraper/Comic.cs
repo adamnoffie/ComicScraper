@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
 
-namespace ComicStripper
+namespace ComicScraper
 {
     [Serializable]
     public class Comic
