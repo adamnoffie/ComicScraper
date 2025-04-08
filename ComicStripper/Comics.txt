@@ -3,8 +3,8 @@
 
 [regex]
 # 0 - Name (must start with "rgx"), 1 - Regex
-rgxGoComics,<a itemprop=['"]image.*?<picture class=['"]item-comic-image.*?['"].*?src=['"](?<url>.*?)['"](?<title>)(?<alt>)
-rgxArcaMax,<img.*?comic.*?src=['"](?<url>.*?/newspics/.*?)['"].*?alt=['"](?<alt>.*?)['"](?<title>)
+rgxGoComics|rel=['"]preload['"] as=['"]image['"] imageSrcSet=['"](?:[^"]*?,\s*)*(?<url>https://[^,\s]+)\s*.*?['"]
+rgxArcaMax|<img.*?comic.*?src=['"](?<url>.*?/newspics/.*?)['"].*?alt=['"](?<alt>.*?)['"](?<title>)
 
 [comics]
 # 0 - Title, 1 - URL, 2 - Regex
@@ -15,13 +15,13 @@ rgxArcaMax,<img.*?comic.*?src=['"](?<url>.*?/newspics/.*?)['"].*?alt=['"](?<alt>
 ##  Pearls Before Swine, http://www.gocomics.com/pearlsbeforeswine, rgxGoComics
 ##	Speed Bump, http://www.gocomics.com/speedbump, rgxGoComics
 ##	Real Life Adventures, http://www.gocomics.com/reallifeadventures, rgxGoComics
-Dilbert, http://www.arcamax.com/thefunnies/dilbert/, rgxArcaMax
-Foxtrot, https://www.gocomics.com/foxtrot/{yyyy/mm/dd}, rgxGoComics
+## Dilbert, http://www.arcamax.com/thefunnies/dilbert/, rgxArcaMax
 ##	Cul De Sac, http://www.gocomics.com/culdesac, rgxGoComics
 ##  Retail, http://www.retailcomic.com/, src=["'](?<url>https://safr\.kingfeatures\.com/idn.*?)["'].*?(?<alt>)(?<title>)
 ##	Baby Blues, http://www.arcamax.com/thefunnies/babyblues/, rgxArcaMax
 ##	Buckets, http://www.gocomics.com/thebuckets, rgxGoComics
-Arlo and Janis, https://www.gocomics.com/arloandjanis/{yyyy/mm/dd}, rgxGoComics
+Arlo and Janis,https://www.gocomics.com/arloandjanis, rgxGoComics
+Foxtrot, https://www.gocomics.com/foxtrot, rgxGoComics
 Mallard Fillmore, http://www.arcamax.com/thefunnies/mallardfillmore/, rgxArcaMax
 Chip Bok, http://www.arcamax.com/politics/chipbok/, rgxArcaMax
 
