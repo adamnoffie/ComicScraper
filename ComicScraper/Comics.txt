@@ -1,9 +1,9 @@
-﻿# comments start with '#'
+# comments start with '#'
 # 'regex' section must come before 'comics' section
 
 [regex]
 # 0 - Name (must start with "rgx"), 1 - Regex
-rgxGoComics,rel=['"]preload['"] as=['"]image['"] imageSrcSet=['"](?:[^"]*?,\s*)*(?<url>https://[^,\s]+)\s*.*?['"]
+rgxGoComics,"contentUrl":"(?<url>https://featureassets\.gocomics\.com/.+?)['"]
 rgxArcaMax,<img.*?comic.*?src=['"](?<url>.*?/newspics/.*?)['"].*?alt=['"](?<alt>.*?)['"](?<title>)
 
 [comics]
