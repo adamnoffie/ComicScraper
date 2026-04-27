@@ -98,10 +98,15 @@ namespace Util
                 req.ReadWriteTimeout = req.Timeout = DefaultTimeout;
                 req.Method = "GET";
                 req.UserAgent = userAgent;
-                if (url.Contains("https"))
-                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls12
-                        | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-                    
+                req.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7";
+                req.Headers.Add("Accept-Language", "en-US,en;q=0.9");
+                req.Headers.Add("Sec-Fetch-Dest", "document");
+                req.Headers.Add("Sec-Fetch-Mode", "navigate");
+                req.Headers.Add("Sec-Fetch-Site", "none");
+                req.Headers.Add("Sec-Fetch-User", "?1");
+                req.Headers.Add("Upgrade-Insecure-Requests", "1");
+
+
                 using (WebResponse resp = req.GetResponse())
                 using (StreamReader sr = new StreamReader(resp.GetResponseStream()))
                 {

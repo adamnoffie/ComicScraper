@@ -5,7 +5,6 @@ using System.Text;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
-using ComicScraper.Properties;
 using System.Threading;
 using Util;
 
@@ -45,7 +44,7 @@ namespace ComicScraper
             var newComics = _comics.Where(x => x.IsNewComic);
             if (newComics.Count() > 0)
             {
-                Logger.WriteLine("   Sending email to {0}", Settings.Default.EmailToAddresses);
+                Logger.WriteLine("   Sending email to {0}", AppSettings.EmailToAddresses);
                 ComicEmailer.SendEmails(newComics);
             }
             else
@@ -61,7 +60,7 @@ namespace ComicScraper
             Logger.WriteLine("   Stripping {0} ", c.Title);
 
             // get the page that has the comic
-            string pageHtml = HttpFetch.UrlAsString(c.Url, Settings.Default.UserAgent);
+            string pageHtml = HttpFetch.UrlAsString(c.Url, AppSettings.UserAgent);
             if (pageHtml == null)
             {
                 Logger.WriteLine("!!   Http Fetch for page failed!");
@@ -83,13 +82,13 @@ namespace ComicScraper
                 // quickly get (using HEAD) the strip image's size, then see if it is different comic
                 // NOTE: this assumes different size is different comic, same size is same comic
                 // I'm assuming it is very unlikely that two strips in a row for same comic would be exact same size in bytes
-                int comicSize = (int)HttpFetch.UrlContentSize(comicUri, Settings.Default.UserAgent, c.Url);
+                int comicSize = (int)HttpFetch.UrlContentSize(comicUri, AppSettings.UserAgent, c.Url);
                 if (comicUri.ToString() != c.PreviousImgUrl || comicSize != c.PreviousImgSize) // different url or different size, download comic
                 {
                     c.PreviousImgSize = comicSize;
                     c.PreviousImgUrl = comicUri.ToString();
                     string filePath = Path.Combine(Environment.CurrentDirectory, string.Format(Constants.ComicStripImgFilePath, c.Title));
-                    c.StripImgFilePath = HttpFetch.UrlToFile(comicUri, filePath, Settings.Default.UserAgent, c.Url);
+                    c.StripImgFilePath = HttpFetch.UrlToFile(comicUri, filePath, AppSettings.UserAgent, c.Url);
                 }
                 else // same size, same comic as last run, don't need to fetch
                 {

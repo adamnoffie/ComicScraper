@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Net.Mail;
 using Util;
-using ComicScraper.Properties;
 
 namespace ComicScraper
 {
@@ -70,7 +69,9 @@ namespace ComicScraper
             {
                 try
                 {
-                    EmailSender.SendEmail(msg, Settings.Default.EmailToAddresses, subject, Settings.Default.EmailUseSSL);
+                    EmailSender.SendEmail(msg, AppSettings.EmailToAddresses, subject, AppSettings.EmailUseSSL,
+                        AppSettings.SmtpHost, AppSettings.SmtpPort, AppSettings.SmtpFrom,
+                        AppSettings.SmtpUserName, AppSettings.SmtpPassword);
                     success = true;
                 }
                 catch (Exception ex)

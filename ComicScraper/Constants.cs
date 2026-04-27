@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -16,12 +17,12 @@ title='[[ALTTEXT]]' alt='[[TITLE]]' ></a></p><br>[[ALTTEXT]]";
         public const string ComicsHistoryFile = "History.xml";
         public const string ComicsLogFile = "Log.txt";
         
-        public const string ComicStripImgPath = "Comics\\";
+        public const string ComicStripImgPath = "Comics";
 
         /// <summary>
         /// Format String with: 0 - filename. NOTE: need to add an extension
         /// </summary>
-        public const string ComicStripImgFilePath = "Comics\\{0}";
+        public static readonly string ComicStripImgFilePath = Path.Combine("Comics", "{0}");
 
         public struct Sections
         {

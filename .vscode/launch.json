@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "ComicScraper",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/ComicScraper/bin/Debug/net8.0/ComicScraper.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/ComicScraper/bin/Debug/net8.0",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        }
+    ]
+}

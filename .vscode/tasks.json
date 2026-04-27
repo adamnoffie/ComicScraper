@@ -1,0 +1,45 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/ComicScraper/ComicScraper.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish (win-x64)",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/ComicScraper/ComicScraper.csproj",
+                "-c", "Release",
+                "-r", "win-x64",
+                // "--self-contained",
+                //"-p:PublishSingleFile=true"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish (linux-x64)",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/ComicScraper/ComicScraper.csproj",
+                "-c", "Release",
+                "-r", "linux-x64",
+                "--self-contained",
+                "-p:PublishSingleFile=true"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
