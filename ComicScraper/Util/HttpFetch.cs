@@ -14,6 +14,30 @@ namespace Util
         public const int MaxAttempts = 3;
         public const int DefaultTimeout = 10 * 1000; // 10 seconds
 
+        private static void ApplyHeaders(HttpWebRequest req, string userAgent, Dictionary<string, string> headers, string referer = null)
+        {
+            req.UserAgent = userAgent;
+            if (referer != null)
+                req.Referer = referer;
+
+            if (headers != null)
+            {
+                foreach (var header in headers)
+                {
+                    // Some headers must be set via properties, not Headers.Add
+                    switch (header.Key)
+                    {
+                        case "Accept":
+                            req.Accept = header.Value;
+                            break;
+                        default:
+                            req.Headers.Add(header.Key, header.Value);
+                            break;
+                    }
+                }
+            }
+        }
+
 
         /// <summary>
         /// Do an Http GET of a url, and store results to file. Extension is determined by content type.
@@ -21,29 +45,29 @@ namespace Util
         /// <param name="uri">uri of object to fetch</param>
         /// <param name="filePath">file path to store fetched object at (this method will try to determine the correct file extension)</param>
         /// <param name="userAgent">http UserAgent header</param>
+        /// <param name="headers">additional http headers</param>
         /// <param name="referer">http Referer header</param>
         /// <returns></returns>
-        public static string UrlToFile(Uri uri, string filePath, string userAgent, string referer)
+        public static string UrlToFile(Uri uri, string filePath, string userAgent, Dictionary<string, string> headers, string referer)
         {
             string returnVal = null;
             int attemptCounter = 1;
             while (returnVal == null && attemptCounter <= 3)
             {
                 attemptCounter++;
-                returnVal = DoFetch_UrlToFile(uri, filePath, userAgent, referer);
+                returnVal = DoFetch_UrlToFile(uri, filePath, userAgent, headers, referer);
             }
             return returnVal;
         }
 
-        private static string DoFetch_UrlToFile(Uri uri, string filePath, string userAgent, string referer)
+        private static string DoFetch_UrlToFile(Uri uri, string filePath, string userAgent, Dictionary<string, string> headers, string referer)
         {
             try
             {
                 HttpWebRequest req = WebRequest.Create(uri) as HttpWebRequest;
                 req.ReadWriteTimeout = req.Timeout = DefaultTimeout;
                 req.Method = "GET";
-                req.UserAgent = userAgent;
-                req.Referer = referer;
+                ApplyHeaders(req, userAgent, headers, referer);
                 using (WebResponse resp = req.GetResponse())
                 using (Stream responseStream = resp.GetResponseStream())
                 {
@@ -77,34 +101,28 @@ namespace Util
         /// </summary>
         /// <param name="url">url of object to fetch</param>
         /// <param name="userAgent">UserAgent http header</param>
+        /// <param name="headers">additional http headers</param>
         /// <returns></returns>
-        public static string UrlAsString(string url, string userAgent)
+        public static string UrlAsString(string url, string userAgent, Dictionary<string, string> headers)
         {
             string returnVal = null;
             int attemptCounter = 1;
             while (returnVal == null && attemptCounter <= MaxAttempts)
             {
                 attemptCounter++;
-                returnVal = DoFetch_UrlAsString(url, userAgent);
+                returnVal = DoFetch_UrlAsString(url, userAgent, headers);
             }
             return returnVal;
         }
 
-        private static string DoFetch_UrlAsString(string url, string userAgent)
+        private static string DoFetch_UrlAsString(string url, string userAgent, Dictionary<string, string> headers)
         {
             try
             {
                 HttpWebRequest req = WebRequest.Create(new Uri(url)) as HttpWebRequest;
                 req.ReadWriteTimeout = req.Timeout = DefaultTimeout;
                 req.Method = "GET";
-                req.UserAgent = userAgent;
-                req.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7";
-                req.Headers.Add("Accept-Language", "en-US,en;q=0.9");
-                req.Headers.Add("Sec-Fetch-Dest", "document");
-                req.Headers.Add("Sec-Fetch-Mode", "navigate");
-                req.Headers.Add("Sec-Fetch-Site", "none");
-                req.Headers.Add("Sec-Fetch-User", "?1");
-                req.Headers.Add("Upgrade-Insecure-Requests", "1");
+                ApplyHeaders(req, userAgent, headers);
 
 
                 using (WebResponse resp = req.GetResponse())
@@ -125,29 +143,29 @@ namespace Util
         /// <param name="uri">url to the resource</param>
         /// <param name="referer">Referer http header</param>
         /// <param name="userAgent">UserAgent http header</param>
+        /// <param name="headers">additional http headers</param>
         /// <returns></returns>
-        public static long UrlContentSize(Uri uri, string userAgent, string referer)
+        public static long UrlContentSize(Uri uri, string userAgent, Dictionary<string, string> headers, string referer)
         {
             int attemptCounter = 1;
             long returnVal = -1;
             while (returnVal == -1 && attemptCounter <= MaxAttempts)
             {
                 attemptCounter++;
-                returnVal = DoFetch_UrlContentSize(uri, userAgent, referer);
+                returnVal = DoFetch_UrlContentSize(uri, userAgent, headers, referer);
             }
 
             return returnVal;
         }
 
-        private static long DoFetch_UrlContentSize(Uri uri, string userAgent, string referer)
+        private static long DoFetch_UrlContentSize(Uri uri, string userAgent, Dictionary<string, string> headers, string referer)
         {
             try
             {
                 HttpWebRequest req = WebRequest.Create(uri) as HttpWebRequest;
                 req.ReadWriteTimeout = req.Timeout = DefaultTimeout;
                 req.Method = "HEAD";
-                req.UserAgent = userAgent;
-                req.Referer = referer;
+                ApplyHeaders(req, userAgent, headers, referer);
                 using (WebResponse resp = req.GetResponse())
                 {
                     return resp.ContentLength;

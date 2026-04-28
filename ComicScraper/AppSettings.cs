@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.Configuration;
 
@@ -6,6 +7,7 @@ namespace ComicScraper
     static class AppSettings
     {
         public static string UserAgent { get; private set; }
+        public static Dictionary<string, string> HttpHeaders { get; private set; }
         public static bool EmailUseSSL { get; private set; }
         public static string EmailToAddresses { get; private set; }
         public static string SmtpFrom { get; private set; }
@@ -23,11 +25,20 @@ namespace ComicScraper
                 .Build();
 
             UserAgent = config["UserAgent"];
-            EmailUseSSL = bool.Parse(config["EmailUseSSL"] ?? "true");
+
+            HttpHeaders = new Dictionary<string, string>();
+            var headersSection = config.GetSection("HttpHeaders");
+            foreach (var child in headersSection.GetChildren())
+            {
+                HttpHeaders[child.Key] = child.Value;
+            }
+
+            var emailUseSslValue = config["EmailUseSSL"];
+            EmailUseSSL = bool.TryParse(emailUseSslValue, out var emailUseSsl) ? emailUseSsl : true;
             EmailToAddresses = config["EmailToAddresses"];
             SmtpFrom = config["Smtp:From"];
             SmtpHost = config["Smtp:Host"];
-            SmtpPort = int.Parse(config["Smtp:Port"] ?? "587");
+            SmtpPort = int.TryParse(config["Smtp:Port"], out var smtpPort) ? smtpPort : 587;
             SmtpUserName = config["Smtp:UserName"];
             SmtpPassword = config["Smtp:Password"];
         }

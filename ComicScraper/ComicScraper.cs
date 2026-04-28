@@ -60,7 +60,7 @@ namespace ComicScraper
             Logger.WriteLine("   Stripping {0} ", c.Title);
 
             // get the page that has the comic
-            string pageHtml = HttpFetch.UrlAsString(c.Url, AppSettings.UserAgent);
+            string pageHtml = HttpFetch.UrlAsString(c.Url, AppSettings.UserAgent, AppSettings.HttpHeaders);
             if (pageHtml == null)
             {
                 Logger.WriteLine("!!   Http Fetch for page failed!");
@@ -82,13 +82,13 @@ namespace ComicScraper
                 // quickly get (using HEAD) the strip image's size, then see if it is different comic
                 // NOTE: this assumes different size is different comic, same size is same comic
                 // I'm assuming it is very unlikely that two strips in a row for same comic would be exact same size in bytes
-                int comicSize = (int)HttpFetch.UrlContentSize(comicUri, AppSettings.UserAgent, c.Url);
+                int comicSize = (int)HttpFetch.UrlContentSize(comicUri, AppSettings.UserAgent, AppSettings.HttpHeaders, c.Url);
                 if (comicUri.ToString() != c.PreviousImgUrl || comicSize != c.PreviousImgSize) // different url or different size, download comic
                 {
                     c.PreviousImgSize = comicSize;
                     c.PreviousImgUrl = comicUri.ToString();
                     string filePath = Path.Combine(Environment.CurrentDirectory, string.Format(Constants.ComicStripImgFilePath, c.Title));
-                    c.StripImgFilePath = HttpFetch.UrlToFile(comicUri, filePath, AppSettings.UserAgent, c.Url);
+                    c.StripImgFilePath = HttpFetch.UrlToFile(comicUri, filePath, AppSettings.UserAgent, AppSettings.HttpHeaders, c.Url);
                 }
                 else // same size, same comic as last run, don't need to fetch
                 {
@@ -99,6 +99,13 @@ namespace ComicScraper
             else // regex matched nothing, or didn't find the "url" group!!!
             {
                 Logger.WriteLine("!!   Regex could not find the strip image!");
+
+                // save the downloaded HTML page for troubleshooting
+                string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                string debugFileName = $"{c.Title}_{timestamp}.html";
+                string debugFilePath = Path.Combine(Environment.CurrentDirectory, Constants.ComicStripImgPath, debugFileName);
+                File.WriteAllText(debugFilePath, pageHtml);
+                Logger.WriteLine("!!   Saved page HTML to {0} for troubleshooting.", debugFilePath);
             }
         }
 
