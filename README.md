@@ -41,7 +41,15 @@ Run them via **Terminal > Run Task** or `Ctrl+Shift+B`.
 
 ### appsettings.json
 
-Application settings are loaded from `appsettings.json` (required) with optional overrides from `appsettings.local.json`. Both files are copied to the output directory on build. Use `appsettings.local.json` for secrets and personal overrides — it should not be committed to source control.
+Application settings are loaded from `appsettings.json` (required) with optional overrides from several additional sources. Settings from later sources override earlier ones:
+
+1. `appsettings.json` — bundled with the application (required)
+2. `<DataPath>/appsettings.json` — user override in the data directory (optional)
+3. `appsettings.local.json` — local development overrides (optional, not committed to source control)
+4. `<DataPath>/appsettings.local.json` — user secrets in the data directory (optional)
+5. Environment variables — highest priority, using `__` as the section separator (e.g. `Smtp__Password`)
+
+In Docker, `DataPath` defaults to `/app/data`. Place your own `appsettings.json` in the mounted data volume to override the bundled defaults without modifying the image.
 
 | Key | Description |
 |-----|-------------|
@@ -54,6 +62,11 @@ Application settings are loaded from `appsettings.json` (required) with optional
 | `Smtp:Port` | SMTP server port (e.g. `587`). |
 | `Smtp:UserName` | SMTP authentication username. |
 | `Smtp:Password` | SMTP authentication password. |
+| `DataPath` | Directory for runtime data and config overrides (`History.json`, `Log.txt`, `Comics/`, and optional `appsettings.json`). Defaults to the current working directory. Set via environment variable. |
+
+All settings can also be overridden via environment variables using `__` (double underscore) as the section separator (e.g. `Smtp__Password`). Environment variables take the highest precedence.
+
+> **Note:** `DataPath` is resolved from the environment variable before config files are loaded, so it cannot be set inside `appsettings.json`. Use the `DataPath` environment variable or accept the default (current working directory).
 
 Example:
 ```json
@@ -82,7 +95,9 @@ Example:
 
 ### Comics.txt
 
-Defines which comics to scrape. This file must be in the same directory as the executable (it is copied there automatically on build).
+Defines which comics to scrape. A default `Comics.txt` ships with the application and is copied to the output directory on build.
+
+To use your own list of comics, place a `Comics.txt` in the `DataPath` directory. If found there, it takes precedence over the bundled default. In Docker, this means placing it in the mounted data volume (e.g. `./data/Comics.txt`).
 
 The file has two sections:
 
@@ -94,11 +109,105 @@ Lines starting with `#` are comments. Lines starting with `##` are commented-out
 ## Program Flow
 
 1. **Load settings** — `AppSettings.Load()` reads `appsettings.json` (and `appsettings.local.json` if present).
-2. **Read config files** — Parses `Comics.txt` for comic definitions and named regexes. Reads `History.xml` (if it exists) to restore previous-run state (last image URL and size per comic).
+2. **Read config files** — Parses `Comics.txt` for comic definitions and named regexes (checking `DataPath` first, then the app directory). Reads `History.json` (if it exists) to restore previous-run state (last image URL and size per comic).
 3. **Scrape each comic** — For each comic entry:
    - Fetches the comic's webpage HTML.
    - Applies the comic's regex to extract the strip image URL (and optional alt text / title).
    - Does an HTTP `HEAD` request to get the image's content size.
    - Compares the image URL and size to the previous run. If different, downloads the image to the `Comics/` directory. If the same, the comic is marked as not new and skipped.
 4. **Send email** — If any new comics were found, composes an HTML email with all new strips embedded as inline images and sends it via SMTP to the configured recipients.
-5. **Save history** — Writes the updated comic state (image URLs and sizes) back to `History.xml` for the next run.
+5. **Save history** — Writes the updated comic state (image URLs and sizes) back to `History.json` for the next run.
+
+## Docker
+
+### Building the image
+
+```sh
+docker build -t comicscraper .
+```
+
+### Running with environment variables
+
+```sh
+docker run --rm \
+  -v ./data:/app/data \
+  -e Smtp__Host=smtp.gmail.com \
+  -e Smtp__Port=587 \
+  -e Smtp__UserName=you@gmail.com \
+  -e Smtp__Password=your-app-password \
+  -e "Smtp__From=Comic Scraper <you@gmail.com>" \
+  -e "EmailToAddresses=You <you@example.com>" \
+  comicscraper
+```
+
+### Running with a config file in the data volume
+
+Place your own `appsettings.json` in the mounted data directory to override the bundled defaults:
+
+```sh
+# Create a data directory and add your config
+mkdir -p ./data
+cp appsettings.json ./data/appsettings.json   # start from the default, then edit
+
+docker run --rm \
+  -v ./data:/app/data \
+  comicscraper
+```
+
+You can also bind-mount a config file directly into the app directory:
+
+```sh
+docker run --rm \
+  -v ./data:/app/data \
+  -v ./appsettings.local.json:/app/appsettings.local.json:ro \
+  comicscraper
+```
+
+### Using Docker Compose
+
+1. Copy `.env.example` to `.env` and fill in your values.
+2. Run:
+
+```sh
+docker compose up
+```
+
+### Persistent data
+
+The container writes `History.json`, `Log.txt`, and `Comics/` to `/app/data` by default. Mount a host directory or Docker volume to `/app/data` to persist state between runs. You can also place `appsettings.json`, `appsettings.local.json`, and `Comics.txt` in the mounted volume to override the bundled defaults.
+
+Without persistence, every run will re-download and re-email all comics.
+
+### Custom Comics.txt
+
+A default `Comics.txt` is bundled in the image. To use your own, place a `Comics.txt` in the mounted data volume:
+
+```sh
+# Copy the bundled default as a starting point
+docker run --rm comicscraper cat Comics.txt > ./data/Comics.txt
+
+# Edit ./data/Comics.txt with your own comics, then run as usual
+docker run --rm -v ./data:/app/data comicscraper
+```
+
+### Environment variables
+
+All `appsettings.json` keys can be overridden via environment variables. Use `__` (double underscore) as the separator for nested keys:
+
+| Variable | Example |
+|---|---|
+| `Smtp__Host` | `smtp.gmail.com` |
+| `Smtp__Port` | `587` |
+| `Smtp__UserName` | `you@gmail.com` |
+| `Smtp__Password` | `your-app-password` |
+| `Smtp__From` | `Comic Scraper <you@gmail.com>` |
+| `EmailToAddresses` | `You <you@example.com>` |
+| `EmailUseSSL` | `true` |
+| `DataPath` | `/app/data` (default in container) |
+
+### Publishing to Docker Hub
+
+```sh
+docker tag comicscraper yourusername/comicscraper:latest
+docker push yourusername/comicscraper:latest
+```

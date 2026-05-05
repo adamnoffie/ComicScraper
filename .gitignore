@@ -4,3 +4,4 @@ bin
 obj
 .vs
 appsettings.local.json
+.env

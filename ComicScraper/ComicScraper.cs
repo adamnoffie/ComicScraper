@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-using System.Net;
+using System.Linq;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Util;
@@ -12,11 +11,14 @@ namespace ComicScraper
 {
     class ComicScraper
     {
-        string _configFilePath = Path.Combine(Environment.CurrentDirectory, Constants.ComicsFile);
-        string _historyFilePath = Path.Combine(Environment.CurrentDirectory, Constants.ComicsHistoryFile);
+        string _configFilePath => Constants.ComicsFile;
+        string _historyFilePath => Constants.ComicsHistoryFile;
         
         List<ComicStripRegex> _regexes = new List<ComicStripRegex>();
         List<Comic> _comics = new List<Comic>();
+
+        // simple record for deserializing history entries
+        private record ComicHistory(string Title, string PreviousImgUrl, int PreviousImgSize); 
 
         /// <summary>
         /// Run the ComicScraper
@@ -27,11 +29,11 @@ namespace ComicScraper
             if (!ReadConfigFile())
                 return;
             ReadHistoryFile();
-            Logger.LogFilePath = Path.Combine(Environment.CurrentDirectory, Constants.ComicsLogFile);
+            Logger.LogFilePath = Constants.ComicsLogFile;
 
             // 2. create directory for storing images if it doesn't exist
-            if (!Directory.Exists(Path.Combine(Environment.CurrentDirectory, Constants.ComicStripImgPath)))
-                Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, Constants.ComicStripImgPath));
+            if (!Directory.Exists(Constants.ComicStripImgPath))
+                Directory.CreateDirectory(Constants.ComicStripImgPath);
 
             // 3. strip the comics from the sites, storing to disk
             foreach (Comic c in _comics)
@@ -87,7 +89,7 @@ namespace ComicScraper
                 {
                     c.PreviousImgSize = comicSize;
                     c.PreviousImgUrl = comicUri.ToString();
-                    string filePath = Path.Combine(Environment.CurrentDirectory, string.Format(Constants.ComicStripImgFilePath, c.Title));
+                    string filePath = string.Format(Constants.ComicStripImgFilePath, c.Title);
                     c.StripImgFilePath = HttpFetch.UrlToFile(comicUri, filePath, AppSettings.UserAgent, AppSettings.HttpHeaders, c.Url);
                 }
                 else // same size, same comic as last run, don't need to fetch
@@ -103,16 +105,19 @@ namespace ComicScraper
                 // save the downloaded HTML page for troubleshooting
                 string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
                 string debugFileName = $"{c.Title}_{timestamp}.html";
-                string debugFilePath = Path.Combine(Environment.CurrentDirectory, Constants.ComicStripImgPath, debugFileName);
+                string debugFilePath = Path.Combine(Constants.ComicStripImgPath, debugFileName);
                 File.WriteAllText(debugFilePath, pageHtml);
                 Logger.WriteLine("!!   Saved page HTML to {0} for troubleshooting.", debugFilePath);
             }
         }
 
-        // write history file (xml)
+        // write history file (json)
         private void WriteHistoryFile()
         {
-            _comics.ToXmlFile(_historyFilePath);
+            var historyData = _comics.Select(c => new { c.Title, c.PreviousImgUrl, c.PreviousImgSize }).ToList();
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string json = JsonSerializer.Serialize(historyData, options);
+            File.WriteAllText(_historyFilePath, json);
         }
 
         // see if we have a history file, with info about previous fetches of each comic, if existing
@@ -120,9 +125,10 @@ namespace ComicScraper
         {
             if (File.Exists(_historyFilePath))
             {
-                // read in the info about comics in the history XML file
-                List<Comic> histories = XmlEx.FromXmlFile<List<Comic>>(_historyFilePath);
-                foreach (Comic ch in histories)
+                // read in the info about comics in the history JSON file
+                string json = File.ReadAllText(_historyFilePath);
+                var histories = JsonSerializer.Deserialize<List<ComicHistory>>(json);
+                foreach (var ch in histories)
                 {
                     Comic c = _comics.Where(x => x.Title == ch.Title).FirstOrDefault();
                     if (c != null)
@@ -133,7 +139,7 @@ namespace ComicScraper
                     }
                 }
             }
-        } 
+        }
 
         // Read the Comics.txt configuration file to get regexes and comics to strip
         private bool ReadConfigFile()

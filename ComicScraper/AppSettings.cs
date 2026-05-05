@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.Configuration;
@@ -15,14 +16,25 @@ namespace ComicScraper
         public static int SmtpPort { get; private set; }
         public static string SmtpUserName { get; private set; }
         public static string SmtpPassword { get; private set; }
+        public static string DataPath { get; private set; }
 
         public static void Load()
         {
-            var config = new ConfigurationBuilder()
+            // Resolve DataPath early from env var (set by Dockerfile ENV) so we
+            // can look for config file overrides in it. Falls back to CWD.
+            DataPath = Environment.GetEnvironmentVariable("DataPath") ?? Directory.GetCurrentDirectory();
+            if (!Directory.Exists(DataPath))
+                Directory.CreateDirectory(DataPath);
+
+            var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false)
+                .AddJsonFile(Path.Combine(DataPath, "appsettings.json"), optional: true)
                 .AddJsonFile("appsettings.local.json", optional: true)
-                .Build();
+                .AddJsonFile(Path.Combine(DataPath, "appsettings.local.json"), optional: true)
+                .AddEnvironmentVariables();
+
+            var config = builder.Build();
 
             UserAgent = config["UserAgent"];
 

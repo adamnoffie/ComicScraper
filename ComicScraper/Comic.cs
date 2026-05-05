@@ -2,25 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Xml.Serialization;
 
 namespace ComicScraper
 {
-    [Serializable]
     public class Comic
     {
         /// <summary>
         /// Title of the Comic
-        /// <example>Pearls Before Swine</example>
+        /// <example>Arlo and Janis</example>
         /// </summary>
-        [XmlAttribute]
         public string Title { get; set; }
 
         /// <summary>
         /// Url to the PAGE with the latest edition of the strip,
         /// <example>e.g. http://comics.com/pearls_before_swine</example>
         /// </summary>
-        [XmlIgnore]
         public string Url {
             get { return _url; }
             set {
@@ -37,38 +33,30 @@ namespace ComicScraper
         /// </example>
         /// <![CDATA[<p class=\"feature_item\">.*?src='(?<url>.*?)'.*?alt='(?<title>.*?)'(?<alt>)]]>
         /// </summary>
-        [XmlIgnore]
         public string SearchRegex { get; set; }
 
         /// <summary>
         /// Used for identifying the image as it is embedded in an email
         /// </summary>
-        [XmlIgnore]
         public string ContentID { get { return Title.Replace(" ", "") + "_" + _contentIDGuid; } }
         private string _contentIDGuid;
 
         /// <summary>
         /// alt attribute on the stripped img tag
         /// </summary>
-        [XmlIgnore]
         public string AltText { get; set; }
 
         /// <summary>
         /// title attribute on the stripped img tag
         /// </summary>
-        [XmlIgnore]
         public string ToolTip { get; set; }
 
-        [XmlAttribute]
         public string PreviousImgUrl { get; set; }
 
-        [XmlAttribute]
         public int PreviousImgSize { get; set; }
 
-        [XmlIgnore]
         public bool IsNewComic { get; set; }
 
-        [XmlIgnore]
         public string StripImgFilePath { get; set; }
 
         public Comic()

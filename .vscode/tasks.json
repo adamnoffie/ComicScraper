@@ -40,6 +40,27 @@
                 "-p:PublishSingleFile=true"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "docker build",
+            "type": "shell",
+            "command": "docker build -t comicscraper ${workspaceFolder}",
+            "problemMatcher": []
+        },
+        {
+            "label": "docker push",
+            "type": "shell",
+            "command": "docker tag comicscraper noffie/comicscraper:${input:dockerTag} && docker push noffie/comicscraper:${input:dockerTag}",
+            "dependsOn": "docker build",
+            "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        {
+            "id": "dockerTag",
+            "type": "promptString",
+            "description": "Docker image tag (e.g. latest, beta, v1.0)",
+            "default": "latest"
         }
     ]
 }

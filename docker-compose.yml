@@ -1,0 +1,10 @@
+services:
+  comicscraper:
+    build: .
+    image: comicscraper:latest
+    volumes:
+      - ./data:/app/data
+      # Optional: mount a local config file for overrides
+      # - ./appsettings.local.json:/app/appsettings.local.json:ro
+    env_file:
+      - .env
