@@ -2,6 +2,8 @@
 
 A console application that scrapes comic strip images from various websites, detects new strips since the last run, and emails them as an HTML digest with embedded images.
 
+Home on Docker Hub: https://hub.docker.com/r/noffie/comicscraper
+
 ## Requirements
 
 - [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
