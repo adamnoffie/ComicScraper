@@ -11,10 +11,8 @@ namespace ComicScraper
 {
     class ComicScraper
     {
-        string _configFilePath => Constants.ComicsFile;
         string _historyFilePath => Constants.ComicsHistoryFile;
         
-        List<ComicStripRegex> _regexes = new List<ComicStripRegex>();
         List<Comic> _comics = new List<Comic>();
 
         // simple record for deserializing history entries
@@ -30,6 +28,7 @@ namespace ComicScraper
                 return;
             ReadHistoryFile();
             Logger.LogFilePath = Constants.ComicsLogFile;
+            Logger.WriteLine("Comic Scraper running...");
 
             // 2. create directory for storing images if it doesn't exist
             if (!Directory.Exists(Constants.ComicStripImgPath))
@@ -141,69 +140,49 @@ namespace ComicScraper
             }
         }
 
-        // Read the Comics.txt configuration file to get regexes and comics to strip
+        // Load comic definitions from appsettings.json configuration
         private bool ReadConfigFile()
         {
-            if (!File.Exists(_configFilePath))
+            // Load named regexes
+            var regexes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var regexSection = AppSettings.Config.GetSection("Regexes");
+            foreach (var child in regexSection.GetChildren())
             {
-                Logger.WriteLine("!!   No Comic Config File (Comics.txt)! Exiting.");
-                return false;
+                regexes[child.Key] = child.Value;
             }
 
-            string currentSection = string.Empty;
-            string[] lines = File.ReadAllLines(_configFilePath);
-
-            for (int i = 0; i < lines.Length; i++)
+            // Load comics
+            var comicsSection = AppSettings.Config.GetSection("Comics");
+            foreach (var child in comicsSection.GetChildren())
             {
-                try
+                var c = new Comic
                 {
-                    string line = lines[i].Trim();
+                    Title = child["Title"],
+                    Url = child["Url"]
+                };
 
-                    if (line.StartsWith("#") || string.IsNullOrEmpty(line))     // comment or blank line
-                        continue;
-                    else if (line.StartsWith("["))                              // section header
-                        currentSection = line.Trim('[', ']').ToLower();
-                    else                                                        // regex or comic definition
+                string regVal = child["Regex"];
+                if (regVal.StartsWith("rgx", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (!regexes.TryGetValue(regVal, out string regex))
                     {
-                        string[] parts;
-                        if (currentSection == Constants.Sections.Regex) // regex
-                        {
-                            parts = line.Split(new char[] { ',' }, 2, StringSplitOptions.RemoveEmptyEntries);
-                            var cr = new ComicStripRegex {
-                                Name = parts[0].Trim(),
-                                Regex = parts[1].Trim()
-                            };
-                            _regexes.Add(cr);
-                        }
-                        else // comic
-                        {
-                            parts = line.Split(new char[] { ',' }, 3, StringSplitOptions.RemoveEmptyEntries);
-                            var c = new Comic {
-                                Title = parts[0].Trim(),
-                                Url = parts[1].Trim()
-                            };
-                            string regVal = parts[2].Trim();
-                            if (regVal.ToLower().StartsWith("rgx")) // rgxXXXXX variable
-                            {
-                                var regex = _regexes.Where(x => x.Name.ToLower() == regVal.ToLower()).FirstOrDefault();
-                                if (regex == null)
-                                {
-                                    Logger.WriteLine("!!   No regex with name {0}!", regVal);
-                                    return false;
-                                }
-                                c.SearchRegex = regex.Regex;
-                            }
-                            else
-                                c.SearchRegex = parts[2]; // per-comic regex
-
-                            _comics.Add(c);
-                        }
+                        Logger.WriteLine("!!   No regex with name {0}!", regVal);
+                        return false;
                     }
+                    c.SearchRegex = regex;
                 }
-                catch (Exception e)
+                else
                 {
-                    Logger.WriteLine("!!   Error reading config file [line {0}]: Exception {1}: {2}", i + 1, e.ToString(), e.Message);
+                    c.SearchRegex = regVal;
                 }
+
+                _comics.Add(c);
+            }
+
+            if (_comics.Count == 0)
+            {
+                Logger.WriteLine("!!   No comics configured in appsettings! Exiting.");
+                return false;
             }
 
             return true;

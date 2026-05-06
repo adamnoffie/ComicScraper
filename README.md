@@ -44,12 +44,14 @@ Run them via **Terminal > Run Task** or `Ctrl+Shift+B`.
 Application settings are loaded from `appsettings.json` (required) with optional overrides from several additional sources. Settings from later sources override earlier ones:
 
 1. `appsettings.json` — bundled with the application (required)
-2. `<DataPath>/appsettings.json` — user override in the data directory (optional)
-3. `appsettings.local.json` — local development overrides (optional, not committed to source control)
+2. `appsettings.local.json` — local development overrides (optional, not committed to source control)
+3. `<DataPath>/appsettings.json` — user override in the data directory (auto-seeded from the bundled default on first run if not present)
 4. `<DataPath>/appsettings.local.json` — user secrets in the data directory (optional)
 5. Environment variables — highest priority, using `__` as the section separator (e.g. `Smtp__Password`)
 
-In Docker, `DataPath` defaults to `/app/data`. Place your own `appsettings.json` in the mounted data volume to override the bundled defaults without modifying the image.
+On first run, if no `appsettings.json` exists in `DataPath`, the bundled default is automatically copied there as a starting point for customization.
+
+In Docker, `DataPath` defaults to `/app/data`. Edit the auto-seeded `appsettings.json` in the mounted data volume to override the bundled defaults without modifying the image.
 
 | Key | Description |
 |-----|-------------|
@@ -62,7 +64,9 @@ In Docker, `DataPath` defaults to `/app/data`. Place your own `appsettings.json`
 | `Smtp:Port` | SMTP server port (e.g. `587`). |
 | `Smtp:UserName` | SMTP authentication username. |
 | `Smtp:Password` | SMTP authentication password. |
-| `DataPath` | Directory for runtime data and config overrides (`History.json`, `Log.txt`, `Comics/`, and optional `appsettings.json`). Defaults to the current working directory. Set via environment variable. |
+| `Regexes` | A key-value map of named regex patterns (e.g. `rgxGoComics`). Each regex must contain a named `url` capture group, with optional `alt` and `title` groups. Referenced by name in `Comics` entries. |
+| `Comics` | An array of comic definitions. Each entry has `Title`, `Url`, and `Regex` (either a name from `Regexes` or an inline regex pattern). |
+| `DataPath` | Directory for runtime data and config overrides (`History.json`, `Log.txt`, `Comics/`, and `appsettings.json`). Defaults to the current working directory. Set via environment variable. |
 
 All settings can also be overridden via environment variables using `__` (double underscore) as the section separator (e.g. `Smtp__Password`). Environment variables take the highest precedence.
 
@@ -71,6 +75,17 @@ All settings can also be overridden via environment variables using `__` (double
 Example:
 ```json
 {
+  // Reusable regex patterns, referenced by name in Comics below.
+  "Regexes": {
+    "rgxGoComics": "\"contentUrl\":\"(?<url>https://featureassets\\.gocomics\\.com/.+?)['\"]" 
+  },
+
+  // Comics to scrape. Regex can be a name from Regexes or an inline pattern.
+  "Comics": [
+    { "Title": "Arlo and Janis", "Url": "https://www.gocomics.com/arloandjanis", "Regex": "rgxGoComics" },
+    { "Title": "XKCD", "Url": "https://xkcd.com/", "Regex": "<img src=\"...(inline regex)...\"" }
+  ],
+
   "UserAgent": "Mozilla/5.0 ...",
   "HttpHeaders": {
     "Accept": "text/html,application/xhtml+xml,...",
@@ -93,23 +108,12 @@ Example:
 }
 ```
 
-### Comics.txt
-
-Defines which comics to scrape. A default `Comics.txt` ships with the application and is copied to the output directory on build.
-
-To use your own list of comics, place a `Comics.txt` in the `DataPath` directory. If found there, it takes precedence over the bundled default. In Docker, this means placing it in the mounted data volume (e.g. `./data/Comics.txt`).
-
-The file has two sections:
-
-- **`[regex]`** — Named regex patterns that can be reused across comics. Each line is a name (starting with `rgx`) followed by a regex with a named `url` capture group (and optional `alt`/`title` groups).
-- **`[comics]`** — One comic per line: `Title, URL, Regex`. The regex can be a literal pattern or a name from the `[regex]` section.
-
-Lines starting with `#` are comments. Lines starting with `##` are commented-out comic entries.
+> **Note:** Standard JSON does not support comments, but `Microsoft.Extensions.Configuration.Json` (used by this application) supports `//` line comments and `/* */` block comments. The bundled `appsettings.json` uses comments to document settings.
 
 ## Program Flow
 
-1. **Load settings** — `AppSettings.Load()` reads `appsettings.json` (and `appsettings.local.json` if present).
-2. **Read config files** — Parses `Comics.txt` for comic definitions and named regexes (checking `DataPath` first, then the app directory). Reads `History.json` (if it exists) to restore previous-run state (last image URL and size per comic).
+1. **Load settings** — reads `appsettings.json` (and overlay files). If no `appsettings.json` exists in `DataPath`, the bundled default is automatically copied there.
+2. **Read config** — Loads `Regexes` and `Comics` sections from the merged configuration. Reads `History.json` (if it exists) to restore previous-run state (last image URL and size per comic).
 3. **Scrape each comic** — For each comic entry:
    - Fetches the comic's webpage HTML.
    - Applies the comic's regex to extract the strip image URL (and optional alt text / title).
@@ -174,19 +178,19 @@ docker compose up
 
 ### Persistent data
 
-The container writes `History.json`, `Log.txt`, and `Comics/` to `/app/data` by default. Mount a host directory or Docker volume to `/app/data` to persist state between runs. You can also place `appsettings.json`, `appsettings.local.json`, and `Comics.txt` in the mounted volume to override the bundled defaults.
+The container writes `History.json`, `Log.txt`, and `Comics/` to `/app/data` by default. On first run, the bundled `appsettings.json` is automatically copied to `/app/data/appsettings.json` if not already present. Mount a host directory or Docker volume to `/app/data` to persist state and configuration between runs.
 
 Without persistence, every run will re-download and re-email all comics.
 
-### Custom Comics.txt
+### Customizing comics
 
-A default `Comics.txt` is bundled in the image. To use your own, place a `Comics.txt` in the mounted data volume:
+Comics and regexes are configured in `appsettings.json`. On first run with a mounted data volume, the default config is auto-seeded to `./data/appsettings.json`. Edit it to add, remove, or modify comics:
 
 ```sh
-# Copy the bundled default as a starting point
-docker run --rm comicscraper cat Comics.txt > ./data/Comics.txt
+# First run seeds ./data/appsettings.json automatically
+docker run --rm -v ./data:/app/data comicscraper
 
-# Edit ./data/Comics.txt with your own comics, then run as usual
+# Edit ./data/appsettings.json with your own comics, then run again
 docker run --rm -v ./data:/app/data comicscraper
 ```
 

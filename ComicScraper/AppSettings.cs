@@ -7,6 +7,7 @@ namespace ComicScraper
 {
     static class AppSettings
     {
+        public static IConfigurationRoot Config { get; private set; }
         public static string UserAgent { get; private set; }
         public static Dictionary<string, string> HttpHeaders { get; private set; }
         public static bool EmailUseSSL { get; private set; }
@@ -26,33 +27,39 @@ namespace ComicScraper
             if (!Directory.Exists(DataPath))
                 Directory.CreateDirectory(DataPath);
 
+            // If no appsettings.json exists in DataPath, seed it from the bundled default
+            string dataAppSettings = Path.Combine(DataPath, "appsettings.json");
+            string baseAppSettings = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.publish.json");
+            if (!File.Exists(dataAppSettings) && File.Exists(baseAppSettings))
+                File.Copy(baseAppSettings, dataAppSettings);
+
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false)
+                .AddJsonFile("appsettings.local.json", optional: true) // developer overrides
                 .AddJsonFile(Path.Combine(DataPath, "appsettings.json"), optional: true)
-                .AddJsonFile("appsettings.local.json", optional: true)
                 .AddJsonFile(Path.Combine(DataPath, "appsettings.local.json"), optional: true)
                 .AddEnvironmentVariables();
 
-            var config = builder.Build();
+            Config = builder.Build();
 
-            UserAgent = config["UserAgent"];
+            UserAgent = Config["UserAgent"];
 
-            HttpHeaders = new Dictionary<string, string>();
-            var headersSection = config.GetSection("HttpHeaders");
+            HttpHeaders = [];
+            var headersSection = Config.GetSection("HttpHeaders");
             foreach (var child in headersSection.GetChildren())
             {
                 HttpHeaders[child.Key] = child.Value;
             }
 
-            var emailUseSslValue = config["EmailUseSSL"];
-            EmailUseSSL = bool.TryParse(emailUseSslValue, out var emailUseSsl) ? emailUseSsl : true;
-            EmailToAddresses = config["EmailToAddresses"];
-            SmtpFrom = config["Smtp:From"];
-            SmtpHost = config["Smtp:Host"];
-            SmtpPort = int.TryParse(config["Smtp:Port"], out var smtpPort) ? smtpPort : 587;
-            SmtpUserName = config["Smtp:UserName"];
-            SmtpPassword = config["Smtp:Password"];
+            var emailUseSslValue = Config["EmailUseSSL"];
+            EmailUseSSL = !bool.TryParse(emailUseSslValue, out var emailUseSsl) || emailUseSsl;
+            EmailToAddresses = Config["EmailToAddresses"];
+            SmtpFrom = Config["Smtp:From"];
+            SmtpHost = Config["Smtp:Host"];
+            SmtpPort = int.TryParse(Config["Smtp:Port"], out var smtpPort) ? smtpPort : 587;
+            SmtpUserName = Config["Smtp:UserName"];
+            SmtpPassword = Config["Smtp:Password"];
         }
     }
 }

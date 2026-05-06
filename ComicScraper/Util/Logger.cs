@@ -15,33 +15,23 @@ namespace Util
         public static string LogFilePath { get; set; }
 
         public static string SessionLog { get { return _sessionLog.ToString(); } }
-        private static StringBuilder _sessionLog = new StringBuilder();
+        private static readonly StringBuilder _sessionLog = new();
 
-        private static bool _firstWrite = true;
-
-        public static void Write(object message)
-        {
-            Console.Write(message);
-            WriteToLogFile(message);
-        }
-
-        public static void WriteLine(object message)
-        {
-            Console.WriteLine(message);
-            WriteToLogFile(message);
-        }
-
+        /// <summary>
+        /// Write a message to the console and log file (if path to log file is set)
+        /// </summary>
+        /// <param name="messageFormat">The message format string.</param>
+        /// <param name="args">The arguments to format into the message string, if any.</param>
         public static void WriteLine(string messageFormat, params object[] args)
         {
-            string msg = string.Format(messageFormat, args);
+            string msg;
+            if (args == null || args.Length == 0)
+                msg = messageFormat;
+            else
+                msg = string.Format(messageFormat, args);
+            
             Console.WriteLine(msg);
             WriteToLogFile(msg);
-        }
-
-        public static void WriteLine()
-        {
-            Console.WriteLine();
-            WriteToLogFile(string.Empty);
         }
         
         // Write to the log file if path to log file is set
@@ -49,19 +39,8 @@ namespace Util
         {            
             if (!string.IsNullOrEmpty(LogFilePath))
             {
-                string msg = Environment.NewLine + message.ToString();
-
-                if (_firstWrite)
-                {
-                    msg = Environment.NewLine + Environment.NewLine +
-                        DateTime.Now.ToString() + Environment.NewLine +
-                        "================================================================" +
-                        msg;
-
-                    _firstWrite = false;
-                }
-
-                // append to Log.txt, creating the file if it doesn't exist
+                string msg = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+                    + " " + message.ToString() + Environment.NewLine;
                 File.AppendAllText(LogFilePath, msg, Encoding.ASCII);
                 _sessionLog.Append(msg);
             }
